@@ -1,0 +1,124 @@
+NETID:  pm489
+
+1) Describe the contents of an IP packet and for each field describe the purpose it serves.
+
+Version - 4 bit field denoting version of IP protocol - IPv4 etc.  
+IHL - Internet Header Length denotes the size of the IP packet header as number of 32 bit words. This is needed because header size can be variable due to variable number of options. 
+TOS -  Type of service field. It can be used to represent datagram's priority. 
+Total Length - Size of entire packet including header and data in bytes.
+Identification - Identification field used for identifying groups of fragments of a single IP datagram.
+Flags - Bit 0: Reserved, must be zero
+        Bit 1: Don't fragment - This bit is used to signal that the packet should not be fragmented at any point along the way. If it needs to be, it is dropped.
+        Bit 2: For unfragmented packets, MF bit is cleared. For fragmented packets, all fragments excepts the last one have MF flag set.
+Fragment Offset : Specified the offset ( in eight byte blocks) of a particular fragment relative to the beginning of the original unfragmented IP datagram.
+TTL: Eight bit time to live field. Used to denotes datagram's lifetime. Each router decrements the TTL field by one.
+Protocol : Protocol used to by the data field. Eg TCP, UDP, ICPM
+Header Checksum: 16 bit field checksum of the header. Matched against the calculated checksum to verify if the packet has arrived intact or not.
+Source Address: IP address of the address of the sender.
+Destination Address: IP address of the receiver of the packet.
+Options: These contain any extra optional fields in the header. 
+Data : The actual data field of the packet. 
+
+
+
+2) Describe the general operation of the BGP protocol.
+Ans -  BGP is a protocol used by gateway hosts to exchange routing information in a network of Autonomous Systems in the internet. BGP uses TCP/IP to communicate. There are two main reasons for BGP. One to calculate the shortest path and another one to find an alternative path in case of failure of one connection. Each BGP gateway host maintains a routing table. Each routing table contains a list of hosts and the addresses that they can reach. The routing table also contains the cost metric associated with each available path, so the best one is chosen at run time based on the destination. Whenever a host has detected a change, it communicates this change to all its other BHP peers. Only the part of the routing table that changed is communicated. 
+
+
+3)Describe why the ethernet protocol necessitates a minimum packet size.
+
+Ans - Ethernet protocol necessitates a mimimum packet size to detect packet collisions over wire. To determine if there was a collision, the sender listened to his own transmission to see if it could be recieved. If it was garbled due to a collision, is would know. But if the packet size is too small, you might not be able to detect this situation. To prevent this, you want the head of the packet to transit from one end of the wire and back again before the tail of the packet finished transmission. If there's a transmission anywhere on the wire overlapping, you'll hear it collide at your receiver. An Ethernet node must be transmitting a frame for the slot time for a collision with that frame to be detected. This is the reason for the minimum Ethernet frame size.
+
+
+4)  Describe how TCP reacts to congestion in the network.  Assume that
+congestion is brought on by BGP reconfiguring the path such that TCP
+packets now go through a bottleneck link of capacity B packets/second.
+Describe in detail what TCP will do when faced with this bottleneck.
+Ans.   TCP primarily uses congestion avoidance algorithm to control network congestion. As the bandwidth is decreased, as soon as a packet loss would occur, TCP would reduce its window size by half. Once it gets the acknowledgement of a packet, it tries to increase the windows size linearly. By doing this repeatedly, the TCP tries to maintain the optimal packet size with respect to the available bandwidth.
+
+
+5) Describe TCP's behavior when it is first getting started delivering data
+over a high latency, high-bandwidth channel such as a satellite link. Be
+sure to explain how TCP manages its window size during the initial
+connection setup.
+Ans.    TCP increases its window size exponentially in the beginning. Since the link has high bandwidth, this approach would help TCP reach the bandwidth threshold quicker than a linear approach. TCP keeps doubling the size until there is packet loss.Whenever it encounters a packet loss, it halves the windows size. Upon halving, it tries to reach the optimal size by linear growth. Thus TCP tries to hover window size optimal for the given bandwidth.
+
+
+6)  On an ethernet segment, the ARP protocol is used to locate the ethernet
+address of a host whose IP address is known. On the Internet, DNS is
+used to locate the IP address of a host whose name is known. ARP and
+DNS are drastically different -- the former uses a broadcast mechanism
+while the latter implements a scalable, distributed database. Explain
+why DNS was designed the way it was, and not, for instance, based on
+a simple broadcast.
+
+Ans. ARP protocol uses broadcast mechanism because it sens packets within within a network. As a result a broadcast on the network is limited only to the network. In case of DNS the scale is much bigger. The machine whose IP address needs to be resolved might be in any network across the world. If everyone started using broadcasting, then the network would be flooded by DNS requests rather than actual data. This scheme would obviously not scale as the size of internet grows. Instead we need a heirarchical structure where each section of the network maintains the DNS entries of its sub section. DNS is a unicase model where the DNS requests are sent to name server who in turn recursively get the entry or give us a address of the node which can help us fetch the entry. As a result each DNS Query would be localized to a group of servers rather than travel every node in the network. 
+
+
+7)  Describe the two means by which a DNS name, such as www.cnn.com, is
+resolved.
+
+Ans - There are two methods in which a DNS Name Query is resolved. 
+a. Recursive Query
+    When www.cnn.com is accessed, the browser through the Operating System Resolver sends the DNS Query for www.cnn.com to a designated configured DNS Server( ex w.x.y.z)
+    When w.x.y.z receives the DNS Query, it checks it cache to see if it has a entry for www.cnn.com, if it has it replies immediately. Otherwise it does a Recursive query.
+    w.x.y.z makes a query to the root server 
+    The Root server then returns back a list of servers who are responsible for the .com domains to w.x.y.z
+    w.x.y.z then picks one of the servers and request for the record of wwww.cnn.com
+    The server responsible for the .com domain server returns a list of authoritative name servers responsible for cnn to w.x.y.z
+    w.x.y.z DNS Server will pick up one of the authoritative name servers and makes a query for www.cnn.com
+    The authoritative Name server returns back x.x.x.x IP Address to the DNS Server
+    The DNS Server then returns back the entry of the IP Address to the operating system
+
+    At every point the DNS Server made the fetch for the address itself without ever asking the operating system to fetch the records for other name servers. This approach is hence a recursive approach.
+
+b. Iterative Query
+    When www.cnn.com is accessed, the browser through the Operating System Resolver sends the DNS Query for www.cnn.com to a designated configured DNS Server. Let say w.x.y.z
+    When w.x.y.z receives the DNS Query, it checks it cache to see if it has a entry for www.cnn.com, if it has it replies immediately. Otherwise it does a Recursive query.
+    w.x.y.z Returns back the Root Server Addresses back to operating system instead of doing a DNS Query.
+    The operating System Resolver picks one of the root servers and then sends a request to the root servers
+    The root servers return back the name servers responsible for the .com domain and return back to the operating system
+    The operating System resolver then picks up on of these servers and sends a request for www.cnn.com
+    These servers in turn look up www.cnn.com and then return back the authoritative name servers responsible for wwww.cnn.com and return it back to the operating system
+    The operating system resolver then picks one of the authoritative name servers and the sends a request for www.cnn.com
+    The Authoritative Name server then returns back the IP Address for www.cnn.com back to the Operating Systems Resolver
+    The Operating System resolver uses this to look up the Page
+
+
+8)  What is a DNS local resolver?
+
+Ans.    There is a client program in every local computer which provides DNS Client service to the local computer in fetching the DNS Names. This is called the DNS Local Resolver.
+When a request is made by a program it is then passed to the DNS Client service for resolution using locally cached information. If the queried name can be resolved, the query is answered. If the query does not match an entry in the cache, the resolution process continues with the client querying a DNS server to resolve the name.
+
+
+9)  What purpose does the ACK # serve in TCP?
+Ans.    ACK# acknowledges the sequence number of the previously received packet. The ACK# tells the packet sender which packet was received. Since sequence number is bytes offset from the start of whole msg, the ACK# also signifies how many bytes are received at the receiver out of total number of bytes to be sent.
+
+
+10) What purpose does the destination port number serve in UDP?
+Ans.    Since packets are sent and received by applications, it is not sufficient to route the packet using just IP. An host can have more than one applications(services/processes). To send a packet to a particular application, port number is used. Each application will be bound to a port number and the packet routed to the destination port once it is received at the host level using IP.
+
+
+11) Why does UDP include a checksum? Wouldn't the end-to-end argument
+require that all checksums be performed at the application level, and
+hence argue that UDP and TCP elide such additional checksums in the
+network stack?
+Ans. UDP included a checksum to detect errors early in the network stack. ALthough the end to end argument requires that checksums would be performed at the application level, but we can compute checksums are very less cost at the UDP stage. Calculating checksums at UDP stage would allow us to catch errors early at relatively very low cost. Performance gains obtained by early error detection usually overshadow the cost of checking checksums at UDP level.
+
+
+12) Imagine that a mail server on host A has just received a TCP/IP SYN
+packet destined for it. Describe everything that happens to this packet
+from the point of its reception by the network interface card to the
+point of its delivery to the mail server.
+Ans- a) The NIC reads the packet and decodes the ethernet header. It then checks if the destination mac address is its own mac address or not. It calculates the frame check sequence and checks if it is valid. If it is valid the packet is then delivered to the network Layer
+    b) The network layer then decoded the IP header and checks the source and IP destination address. The destination IP address should match its own IP address. Then it computes the and validates the checksum. If ML flag is turned on, it wait for more fragments to arrive and then forwards the packet to transport layer.
+    c) The transport layer decodes the source and destination ports. Checksums for the relevant data and headers are computed. Then the transport layer finds out the service which is running on the given destination port. Here the packet can be TCP or UDP. Depending upon the protocol all the necessary checks for things like retransmission etc are done. The packet is then forwarded to the given application.
+    d) The application returns from the system call it made to get network data. Only the application data is forwarded to this layer.
+
+13) What are at-most-once semantics for RPC?
+Ans -At most sematics for RPC means that if the invoker does not know whether the remote procedure call was successful or not, it will not retry the call. (or will ensure that there is a negative acknowledgement of the invocation before retrying). This is because there is no way of knowing whether the call was successful or not due to the data being sent over the network. This is used when the function calls are not idempotent and calling the function twice can lead to undesirable situations.The call executes at most once - either it does not execute at all.
+
+14) What is marshalling? What is unmarshalling? When during an RPC
+does marshalling take place?
+Ans Marshalling is the process of packing the parameters of a remote procedure call into a packet that can be sent over the wire. 
+On the client side, the client stub marshalls the parameters into the call packet;  on the server side the server stub unmarshalls the parameters in order to call the server’s procedure. Unmarshalling is the process of unpacking the received parameters from a network packet and calling the procedure with those parameters. On the return, the server stub marshalls return parameters into the return packet;  the client stub unmarshalls return parameters and returns to the client
