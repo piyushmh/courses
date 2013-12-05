@@ -3,6 +3,7 @@ import LFS
 import Disk
 import Segment
 import InodeMap
+import pdb
 
 from threading import Thread, Lock, Condition, Semaphore
 from Disk import DiskClass
@@ -47,7 +48,8 @@ class Shell:
         InodeMap.inodemap = InodeMapClass()
         LFS.filesystem = LFSClass(initdisk=brandnew)
         if brandnew:
-            rootinode=Inode(isdirectory=True)
+            Inode.inodeidpool = 1 #Resetting this to 1 because mkfs might be run multiple times
+            rootinode=Inode(isdirectory=True) #We make the root inode here
         else:
             LFS.filesystem.restore()
 
@@ -55,6 +57,7 @@ class Shell:
         if len(args) != 3:
             print "Usage: create filename length"
             return
+        print "Doing create with :", canonicalize(args[1], self.currentDirectory)
         fd = LFS.filesystem.create(canonicalize(args[1], self.currentDirectory))
         # construct a string of the right size
         repeatstr = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -67,22 +70,26 @@ class Shell:
 
     def ls(self, args):
         curdirpath = canonicalize(args[1] if len(args) > 1 else '', self.currentDirectory)
+        print "Executing ls with path :", curdirpath
         dd = LFS.filesystem.open(curdirpath, isdir=True)
         for name, inode in dd.enumerate():
             size, isdir = LFS.filesystem.stat("%s%s%s" % (curdirpath, '/' if curdirpath[-1:] != '/' else '', name))
             print "%s\tinode=%d\ttype=%s\tsize=%d" % (name, inode, "DIR" if isdir else "FILE", size)
 
     def cat(self, args):
+        if len(args) != 2:
+            print "Usage: cat filename"
+            return
         fd = LFS.filesystem.open(canonicalize(args[1], self.currentDirectory))
         data = fd.read(50000000)
-        print data
+        print data  
         fd.close()
 
     def write(self, args):
         if len(args) < 3:
             print "Usage: write filename data"
             return
-
+        pdb.set_trace()
         fd = LFS.filesystem.open(canonicalize(args[1], self.currentDirectory))
         fd.write(args[2])
         fd.close()

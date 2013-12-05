@@ -5,7 +5,7 @@ from Constants import DISKSIZE, BLOCKSIZE
 # take place at a higher level in the software stack inside the
 # file system!
 
-DEBUG = False
+DEBUG = True
 
 class DiskException(Exception):
     def __init__(self, errortype):

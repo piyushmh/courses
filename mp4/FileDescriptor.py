@@ -37,4 +37,9 @@ class FileDescriptor(object):
 
     def write(self, data):
         # XXX - do this tomorrow! after the meteor shower!
+        inodeobject = self._getinode()
+        inodeobject.write(self.position, data)
+        self.position += len(data)
+
+    def seek(self, position):
         pass
