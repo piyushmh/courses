@@ -16,9 +16,11 @@ from Constants import FILENAMELEN
 from FSE import FileSystemException
 import Disk
 
-DEBUG = True
+DEBUG = False
 
 def find_parent_name(path):
+    if DEBUG:
+        print "Inside LFS.find_parent_name for path :",path
     parent, sep, element = path.rpartition("/")
     if parent == '':
         parent = '/'
@@ -39,9 +41,11 @@ class LFSClass:
 
     # open an existing file or directory
     def open(self, path, isdir=False):
-        print "Inside LFS.open for path :",path
+        if DEBUG:
+            print "Inside LFS.open for path :",path
         inodenumber = self._searchfiledir(path)
-        print "Inside LFS.open, HERE1", inodenumber
+        if DEBUG:
+            print "Inside LFS.open, HERE1", inodenumber
         if inodenumber is None:
             raise FileSystemException("Path Does Not Exist")
         # create and return a Descriptor of the right kind
@@ -51,11 +55,16 @@ class LFSClass:
             return FileDescriptor(inodenumber)
 
     def create(self, filename, isdir=False):
-        print "Inside LFSClass:create for filename :", filename
+        if DEBUG:
+            print "Inside LFSClass:create for filename :", filename
         fileinodenumber = self._searchfiledir(filename)
-        print "Inside LFSClass:create 1.", fileinodenumber
+        if DEBUG:
+            print "Inside LFSClass:create 1.", fileinodenumber
         if fileinodenumber is not None:
-            raise FileSystemException("File Already Exists")
+            if not isdir:
+                raise FileSystemException("File Already Exists")
+            else:
+                raise FileSystemException("Dir Already Exists")
 
         # create an Inode for the file
         # Inode constructor writes the inode to disk and implicitly updates the inode map
@@ -63,6 +72,10 @@ class LFSClass:
 
         # now append the <filename, inode> entry to the parent directory
         parentdirname = find_parent_name(filename)
+        
+        if DEBUG:
+            print "Inside LFS.create, Here 1 parentdirname :", parentdirname
+
         parentdirinodenumber = self._searchfiledir(parentdirname)
         if parentdirinodenumber is None:
             raise FileSystemException("Parent Directory Does Not Exist")
@@ -86,9 +99,56 @@ class LFSClass:
         return inodeobject.filesize, inodeobject.isDirectory
 
     # delete the given file
-    def unlink(self, pathname):
+    def unlink(self, pathname, isdir=False):
         # XXX - do this tomorrow! after the meteor shower!
-        pass
+        fileinodenumber = self._searchfiledir(pathname)
+        if fileinodenumber is None:
+            if not isdir:
+                raise FileSystemException("File does not exist")
+            else:
+                raise FileSystemException("Dir does not exist")
+
+        
+        fileblocknum = InodeMap.inodemap.lookup(fileinodenumber)
+        fileinode = Inode(str=Segment.segmentmanager.blockread(fileblocknum))
+        if not isdir:
+            if fileinode.isDirectory == 1:
+                raise FileSystemException("Not a file, please use rm")
+        else:
+            if fileinode.isDirectory == 0:
+                raise FileSystemException("Not a dir, please use rmdir")   
+
+        parentdirname = find_parent_name(pathname)
+        parentdirinodenumber = self._searchfiledir(parentdirname)
+        if parentdirinodenumber is None:
+            raise FileSystemException("Parent Directory Does Not Exist")
+        parentdirblockloc = InodeMap.inodemap.lookup(parentdirinodenumber)
+        parentdirinode = Inode(str=Segment.segmentmanager.blockread(parentdirblockloc))
+        self.delete_directory_entry(parentdirinode, find_filename(pathname))
+        result = InodeMap.inodemap.remove_mapping(fileinodenumber)
+        if result ==-1:
+            print "Alert 2 :Check what happened, inode map is corrupt"
+
+
+    # remove the passed file name from the inode passed
+    # Here we are assuimg that the file to be removed is present in the 
+    # parent dir, the caller should handle this shit.
+    def delete_directory_entry(self,parentdirinode, filenametoremove):
+        numentries = parentdirinode.filesize/ (FILENAMELEN + 4 )
+        newdata = ""
+        pos = 0
+        for i in range(0,numentries):
+            data = parentdirinode.read(pos,FILENAMELEN+4)
+            pos += len(data)
+            name, inode = struct.unpack("%dsI" % (FILENAMELEN,), data[0:(FILENAMELEN + 4)])
+            name  = name.strip('\x00')
+            if name != filenametoremove:
+                newdata += data
+        #Here newdata has everything the old directory had except the file to be removed
+        parentdirinode.filesize -= (FILENAMELEN + 4)
+        parentdirinode.write(0,newdata)
+
+
 
     # write all in memory data structures to disk
     def sync(self):

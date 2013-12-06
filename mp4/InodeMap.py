@@ -44,7 +44,7 @@ class InodeMapClass:
     # most recent segment, and read the latest valid inodemap
     # from the segment
     def restore_inode_map(self, imdata):
-        print repr(imdata)
+        #print repr(imdata)
         self.mapping = {}
         iip = struct.unpack("I", imdata[0:4])[0]
         imdata = imdata[4:]
@@ -52,5 +52,13 @@ class InodeMapClass:
             key, val = struct.unpack("II", imdata[keyvaloffset:keyvaloffset + 8])
             self.mapping[key] = val
         return iip
+
+    def remove_mapping(self, inodeid):
+        if inodeid in self.mapping:
+            del self.mapping[inodeid]
+            return 1
+        else:
+            return -1
+
 
 inodemap = None

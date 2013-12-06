@@ -57,7 +57,7 @@ class Shell:
         if len(args) != 3:
             print "Usage: create filename length"
             return
-        print "Doing create with :", canonicalize(args[1], self.currentDirectory)
+        #print "Doing create with :", canonicalize(args[1], self.currentDirectory)
         fd = LFS.filesystem.create(canonicalize(args[1], self.currentDirectory))
         # construct a string of the right size
         repeatstr = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -70,7 +70,7 @@ class Shell:
 
     def ls(self, args):
         curdirpath = canonicalize(args[1] if len(args) > 1 else '', self.currentDirectory)
-        print "Executing ls with path :", curdirpath
+        #print "Executing ls with path :", curdirpath
         dd = LFS.filesystem.open(curdirpath, isdir=True)
         for name, inode in dd.enumerate():
             size, isdir = LFS.filesystem.stat("%s%s%s" % (curdirpath, '/' if curdirpath[-1:] != '/' else '', name))
@@ -95,6 +95,9 @@ class Shell:
         fd.close()
 
     def mkdir(self, args):
+        if len(args) != 2:
+            print "Usage: mkdir dirname"
+            return
         LFS.filesystem.create(canonicalize(args[1], self.currentDirectory), isdir=True)
 
     def cd(self, args):
@@ -116,11 +119,20 @@ class Shell:
 
     def rm(self, args):
         # XXX - do this tomorrow! after the meteor shower!
-        pass
+        if len(args)!=2:
+            print "Usage: rm filename"
+            return
+        pdb.set_trace()
+        LFS.filesystem.unlink(canonicalize(args[1], self.currentDirectory))
+        
 
     def rmdir(self, args):
         # XXX - do this tomorrow! after the meteor shower!
-        pass
+        if len(args)!=2:
+            print "Usage: rmdir dirname"
+            return
+        #pdb.set_trace()
+        LFS.filesystem.unlink(canonicalize(args[1], self.currentDirectory), isdir=True)
 
     def quit(self, args):
         print "\nSo Long, and Thanks for All the Fish!"

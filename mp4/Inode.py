@@ -16,6 +16,8 @@ def setmaxinode(maxii):
     global inodeidpool
     inodeidpool = maxii
 
+DEBUG = False
+
 class Inode:
     def __init__(self, str=None, isdirectory=False):
         global inodeidpool
@@ -39,7 +41,8 @@ class Inode:
             self.indirectblock = 0
             self.isDirectory = isdirectory
             # write the new inode to disk
-            print "Initializing inode with id ",self.id, " HERE1" #SEE 
+            if DEBUG:
+                print "Initializing inode with id ",self.id, " HERE1" #SEE 
             InodeMap.inodemap.update_inode(self.id, self.serialize())
             
     # returns a serialized version of the Inode that fits in a fixed
@@ -134,7 +137,8 @@ class Inode:
         moretoread = amounttoread
         data = ""
         while moretoread > 0:
-            print "Inside Inode.read, reading block number :", currentblock
+            if DEBUG:
+                print "Inside Inode.read, reading block number :", currentblock
             contents = self._getdatablockcontents(currentblock)
             newdata = contents[inblockoffset:]
             inblockoffset = 0
