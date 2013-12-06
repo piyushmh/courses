@@ -3,6 +3,7 @@ import sys, struct
 import re
 import Segment
 import InodeMap
+import pdb
 
 from threading import Thread, Lock, Condition, Semaphore
 from Segment import SegmentManagerClass
@@ -92,12 +93,13 @@ class LFSClass:
     # write all in memory data structures to disk
     def sync(self):
         if DEBUG:
-            print "Inide LFS.sync"
+            print "Inside LFS.sync"
         # XXX - do this tomorrow! after the meteor shower!
         inode = Inode()
         inodeblockid = InodeMap.inodemap.lookup(inode.id)
-        str, gencount = InodeMap.inodemap.save_inode_map(Inode.getmaxinode())
+        str, gencount = InodeMap.inodemap.save_inode_map(getmaxinode())
         inode.write(0,str)
+        inodeblockid = InodeMap.inodemap.lookup(inode.id)
         Segment.segmentmanager.currentseg.superblock.inodemapgeneration = gencount
         Segment.segmentmanager.currentseg.superblock.inodemaplocation = inodeblockid
         Segment.segmentmanager.flush()
@@ -106,10 +108,11 @@ class LFSClass:
 
     # restore in memory data structures (e.g. inode map) from disk
     def restore(self):
+        #pdb.set_trace()
         imlocation = Segment.segmentmanager.locate_latest_inodemap()
-        print repr(imlocation) #SEE
+        #print repr(imlocation) #SEE
         str=Disk.disk.blockread(imlocation)
-        print repr(str)#SEE
+        #print repr(str)#SEE
         iminode = Inode(str)
         imdata = iminode.read(0, 10000000)
         # restore the latest inodemap from wherever it may be on disk
@@ -121,7 +124,8 @@ class LFSClass:
     # Writing this assuming the path would be canonicalized wrt root
     def _searchfiledir(self, path):
         # XXX - do this tomorrow! after the meteor shower! -Ok bro:)
-        print "Inside LFSClass.searchfiledir : for path :", path
+        if DEBUG:
+            print "Inside LFSClass.searchfiledir : for path :", path
         if path[0]!= '/':
             print "Inside LFSClass.searchfiledir : Path not canonicalized properly"
             return None
@@ -143,7 +147,8 @@ class LFSClass:
         return inode
 
     def _search_file_dir(self, inodenumber, tosearch):
-        print "Inside LFSClass._searchfiledir for inode and file/dir" , inodenumber, tosearch
+        if DEBUG:
+            print "Inside LFSClass._searchfiledir for inode and file/dir" , inodenumber, tosearch
         if len(tosearch) == 0:
             raise FileSystemException("Inside LFSClass._searchfiledir : Bad file name passed " + str(tosearch))
         

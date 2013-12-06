@@ -2,6 +2,7 @@ import struct
 import Segment
 from Segment import SegmentClass
 
+DEBUG = False
 # the task of the InodeMap is to map inodes to their
 # position on the disk
 class InodeMapClass:
@@ -20,7 +21,11 @@ class InodeMapClass:
     # inode map with the new position of the inode
     # on the disk
     def update_inode(self, inodeid, inodedata):
+        if DEBUG:
+            print "Inside InodeMapClass:update_inode for inodeid :", inodeid
         inodeblockloc = Segment.segmentmanager.write_to_newblock(inodedata)
+        if DEBUG:
+            print "Inside InodeMapClass:update_inode for blockid :", inodeblockloc
         self.mapping[inodeid] = inodeblockloc
 
     # write the inodemap to the end of the current segment
@@ -39,6 +44,7 @@ class InodeMapClass:
     # most recent segment, and read the latest valid inodemap
     # from the segment
     def restore_inode_map(self, imdata):
+        print repr(imdata)
         self.mapping = {}
         iip = struct.unpack("I", imdata[0:4])[0]
         imdata = imdata[4:]

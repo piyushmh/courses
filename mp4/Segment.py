@@ -8,13 +8,14 @@ from Constants import BLOCKSIZE, DISKSIZE, SEGMENTSIZE, NUMSEGMENTS
 NUMBLOCKS = SEGMENTSIZE - 1 # number of blocks in a segment 
 #(one less than SEGMENTSIZE because of the superblock)
 
-DEBUG = True
+DEBUG = False
 
 # the segmentmanager manages the current segment, flushing it
 # to disk as necessary and picking up another segment to work on
 class SegmentManagerClass:
     def __init__(self):
         self.segcounter = 0
+        self.currentseg = SegmentClass(self.segcounter)
 
     # write the given data to a free block in the current segment.
     # if no free block exists, find another segment with a free block in it
@@ -22,7 +23,8 @@ class SegmentManagerClass:
     # Returns -1 if data >BLOCKSIZE or if disk ran out of memory
     def write_to_newblock(self, data):
         # XXX - do this tomorrow! after the meteor shower! - Okay bro!!
-        print "Inside SegmentManager:write_to_newblock for datasize :", len(data) #SEE
+        if DEBUG:
+            print "Inside SegmentManager:write_to_newblock for datasize :", len(data) #SEE
         retval = -1
         if len(data) > BLOCKSIZE: # NOTE- Add exception later
             print "Inside SegmentManager:write_to_newblock :Data length greater than Block size for data :", data
@@ -35,7 +37,7 @@ class SegmentManagerClass:
             else:
                 retval = self.currentseg.write_to_newblock(data[:BLOCKSIZE])
 
-        return retval
+        return (retval + self.currentseg.segmentbase)
             
 
     # Flushes the current segment into disk. Then keeps assigning
@@ -74,10 +76,12 @@ class SegmentManagerClass:
         if DEBUG:
             print "Writing block #%d to the segment" % blockno
         blockoffset = blockno - 1 - self.currentseg.segmentbase
-        if len(data) != len(self.currentseg.blocks[blockoffset]):
+        if len(data) > BLOCKSIZE:
             print "Assertion error 1: data being written to segment is not the right size (%d != %d)" % (len(data), len(self.currentseg.blocks[blockoffset]))
+            raise FileSystemException("Segment.update_in_place, incorrect size passed" + str(len(data)))
         else:
-            self.currentseg.blocks[blockoffset] = data
+            self.currentseg.blocks[blockoffset] = data + self.currentseg.blocks[blockoffset][len(data):]
+
     def read_in_place(self, blockno):
         if DEBUG:
             print "Reading block #%d from the segment" % blockno
@@ -99,6 +103,7 @@ class SegmentManagerClass:
         imlocation = -1
         for segno in range(0, NUMSEGMENTS):
             superblock = SuperBlock(data=Disk.disk.blockread(segno * SEGMENTSIZE))
+            #print superblock
             if superblock.inodemapgeneration > 0 and superblock.inodemapgeneration > maxgen:
                 maxgen = superblock.inodemapgeneration
                 imlocation = superblock.inodemaplocation
@@ -107,19 +112,21 @@ class SegmentManagerClass:
 class SuperBlock:
     def __init__(self, data=None):
         if data is None:
-            print "2. Inside super block const,none case" #SEE
             # the first block is the superblock and is handled specially
             self.blockinuse = [False] * NUMBLOCKS
             self.inodemapgeneration = -1
             self.inodemaplocation = -1
         else:
-            print "2. Inside super block constructor,non none case" #SEE
             # recover a superblock that was previously written to disk
             self.blockinuse = [False] * NUMBLOCKS
             for i in range(0, NUMBLOCKS):
                 self.blockinuse[i] = struct.unpack('?', data[i])[0]
             self.inodemapgeneration = struct.unpack('I', data[NUMBLOCKS:NUMBLOCKS+4])[0]
             self.inodemaplocation = struct.unpack('I', data[NUMBLOCKS+4:NUMBLOCKS+8])[0]
+            
+
+    def __str__(self):
+        return "InodeMapGen :" + str(self.inodemapgeneration) + "\n" + "InodeMapLoc :" + str(self.inodemaplocation)
 
     def serialize(self):
         str = ""
@@ -139,8 +146,8 @@ class SegmentClass:
     def __init__(self, segmentnumber):
         self.segmentbase = segmentnumber * SEGMENTSIZE
         # read the superblock, it's the first block in the segment
-        data=Disk.disk.blockread(self.segmentbase)
-        print "1.Inside segment class :" + repr(data)
+        #data=Disk.disk.blockread(self.segmentbase)
+        #print "1.Inside segment class :" + repr(data)
         self.superblock = SuperBlock(data=Disk.disk.blockread(self.segmentbase))
         self.blocks= []
         # read the segment blocks from disk, they follow the superblock
@@ -164,7 +171,7 @@ class SegmentClass:
                 return i + 1
         return -1
 
-    #This first flushes the serialized version of superblock and then all
+    #This first flushinges the serialized version of superblock and then all
     # the blocks in the segment
     def flush(self):
         #write the superblock to disk

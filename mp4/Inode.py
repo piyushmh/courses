@@ -2,11 +2,12 @@ import sys, struct, os, random, math, pickle
 import Disk
 import Segment
 import InodeMap
+import pdb
 
 from InodeMap import InodeMapClass
 from Constants import BLOCKSIZE
 
-NUMDIRECTBLOCKS = 100 # can have as many as 252 and still fit an Inode in a 1024 byte block
+NUMDIRECTBLOCKS = 1 # can have as many as 252 and still fit an Inode in a 1024 byte block
 inodeidpool = 1  # 1 is reserved for the root inode
 
 def getmaxinode():
@@ -40,7 +41,7 @@ class Inode:
             # write the new inode to disk
             print "Initializing inode with id ",self.id, " HERE1" #SEE 
             InodeMap.inodemap.update_inode(self.id, self.serialize())
-
+            
     # returns a serialized version of the Inode that fits in a fixed
     # size data block
     def serialize(self):
@@ -65,11 +66,12 @@ class Inode:
         else:
             # XXX - do this after the meteor shower! - alrighty almighty
             newdata = ""
+            blockoffset = blockoffset-len(self.fileblocks)
             if not self.indirectblock:  #this means the indirect block hasnt been allocated
-                if len(self.fileblocks)!= blockoffset:
+                if len(self.fileblocks)!= (blockoffset+len(self.fileblocks)):
                     print "Alert 1, this should not have happened"
                 for i in range(0, BLOCKSIZE/4):
-                    if i == (blockoffset-len(self.fileblocks)):
+                    if i == blockoffset:
                         newdata += struct.pack("I",blockaddress)
                     else:
                         newdata += struct.pack("I",0)
@@ -79,27 +81,27 @@ class Inode:
                 newdata += struct.pack("I",blockaddress)
                 newdata += data[(blockoffset+1)*4:]
 
-            self.indirectblock = Segment.segmentmanager.write_to_newblock(data)
+            self.indirectblock = Segment.segmentmanager.write_to_newblock(newdata)
 
     def _datablockexists(self, blockoffset):
         if blockoffset < len(self.fileblocks):
             return self.fileblocks[blockoffset] != 0
         else:
             # XXX - do this after the meteor shower!
-            if self.indirectblockid == 0:
+            if self.indirectblock == 0:
                 return 0
-            else
+            else:
                 blockoffset -= len(self.fileblocks)
                 data = Segment.segmentmanager.blockread(self.indirectblock)
-                blockid = struct.unpack("I", data[4*blockoffset:])[0]
+                blockid = struct.unpack("I", data[4*blockoffset:4*(blockoffset+1)])[0]
                 if not blockid:
                     return 0
-                else 
+                else:
                     return 1
             
 
     # given the number of a data block inside a file, i.e. 0 for
-    # the first block, 1 for the second and so forth, returns
+    # the first block, 1 for the second and so forth, returnss
     # the contents of that block as a string
     # Adding support for indirect blocks
     def _getdatablockcontents(self, blockoffset):
@@ -110,15 +112,15 @@ class Inode:
             indirectblockid = self.indirectblock
             indirectblockcontent = Segment.segmentmanager.blockread(indirectblockid)
             blockid = self._read_from_indirect_block(indirectblockcontent, blockoffset - len(self.fileblocks))
-                        
         return Segment.segmentmanager.blockread(blockid)
 
     # Read from indirect block, blockcontent is the content of the 
     # indirect block and the offset is the offset in its  
-    def _read_from_indirect_block(blockcontent, blockoffet):
-        print "Inside Inode:_read from indirect block for offset ",blockoffet
-        if blockoffet < (BLOCKSIZE/4):
-            blockid = struct.unpack("I", blockcontent[blockoffset*4:])
+    def _read_from_indirect_block(self,blockcontent, blockoffset):
+        print "Inside Inode:_read from indirect block for offset ",blockoffset
+        if blockoffset < (BLOCKSIZE/4):
+            blockid = struct.unpack("I", blockcontent[blockoffset*4:(blockoffset+1)*4])[0]
+            return blockid
         else:
             print "Inside Inode:_read_from_indirect_block:Block size is passed is invalid, trace back ,", blockoffset
 
@@ -132,6 +134,7 @@ class Inode:
         moretoread = amounttoread
         data = ""
         while moretoread > 0:
+            print "Inside Inode.read, reading block number :", currentblock
             contents = self._getdatablockcontents(currentblock)
             newdata = contents[inblockoffset:]
             inblockoffset = 0

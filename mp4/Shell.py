@@ -81,6 +81,7 @@ class Shell:
             print "Usage: cat filename"
             return
         fd = LFS.filesystem.open(canonicalize(args[1], self.currentDirectory))
+        #pdb.set_trace()
         data = fd.read(50000000)
         print data  
         fd.close()
@@ -89,7 +90,6 @@ class Shell:
         if len(args) < 3:
             print "Usage: write filename data"
             return
-        pdb.set_trace()
         fd = LFS.filesystem.open(canonicalize(args[1], self.currentDirectory))
         fd.write(args[2])
         fd.close()
