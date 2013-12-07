@@ -62,9 +62,9 @@ class LFSClass:
             print "Inside LFSClass:create 1.", fileinodenumber
         if fileinodenumber is not None:
             if not isdir:
-                raise FileSystemException("File Already Exists")
+                raise FileSystemException("create: cannot create file '{}': File exist".format(filename))
             else:
-                raise FileSystemException("Dir Already Exists")
+                raise FileSystemException("mkdir: cannot create directory '{}': File exist".format(filename))
 
         # create an Inode for the file
         # Inode constructor writes the inode to disk and implicitly updates the inode map
@@ -104,24 +104,28 @@ class LFSClass:
         fileinodenumber = self._searchfiledir(pathname)
         if fileinodenumber is None:
             if not isdir:
-                raise FileSystemException("File does not exist")
+                raise FileSystemException("rmdir: cannot remove '{}': No such file or directory".format(pathname))
             else:
-                raise FileSystemException("Dir does not exist")
+                raise FileSystemException("rmdir: failed to remove '{}': No such file or directory".format(pathname))
 
         
         fileblocknum = InodeMap.inodemap.lookup(fileinodenumber)
         fileinode = Inode(str=Segment.segmentmanager.blockread(fileblocknum))
         if not isdir:
             if fileinode.isDirectory == 1:
-                raise FileSystemException("Not a file, please use rm")
+                raise FileSystemException("rm: cannot remove '{}': Is a directory".format(pathname))
         else:
             if fileinode.isDirectory == 0:
-                raise FileSystemException("Not a dir, please use rmdir")   
+                raise FileSystemException("rmdir: failed to remove '{}': Not a directory".format(pathname))   
 
         parentdirname = find_parent_name(pathname)
         parentdirinodenumber = self._searchfiledir(parentdirname)
         if parentdirinodenumber is None:
-            raise FileSystemException("Parent Directory Does Not Exist")
+            if not isdir:
+                raise FileSystemException("rmdir: cannot remove '{}': No such file or directory".format(pathname))
+            else:
+                raise FileSystemException("rmdir: failed to remove '{}': No such file or directory".format(pathname))
+
         parentdirblockloc = InodeMap.inodemap.lookup(parentdirinodenumber)
         parentdirinode = Inode(str=Segment.segmentmanager.blockread(parentdirblockloc))
         self.delete_directory_entry(parentdirinode, find_filename(pathname))
@@ -169,7 +173,7 @@ class LFSClass:
     # restore in memory data structures (e.g. inode map) from disk
     def restore(self):
         #pdb.set_trace()
-        imlocation = Segment.segmentmanager.locate_latest_inodemap()
+        imlocation, maxgen = Segment.segmentmanager.locate_latest_inodemap()
         #print repr(imlocation) #SEE
         str=Disk.disk.blockread(imlocation)
         #print repr(str)#SEE
@@ -177,6 +181,7 @@ class LFSClass:
         imdata = iminode.read(0, 10000000)
         # restore the latest inodemap from wherever it may be on disk
         setmaxinode(InodeMap.inodemap.restore_inode_map(imdata))
+        InodeMap.inodemap.generationcount = maxgen
 
     # for a given file or directory named by path,
     # return its inode number if the file or directory exists,
@@ -219,8 +224,6 @@ class LFSClass:
 
         return -1
             
-
-
 
     # add the new directory entry to the data blocks,
     # write the modified inode to the disk,

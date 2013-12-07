@@ -3,7 +3,7 @@ import sys, struct, os, random, time
 import Disk
 from FSE import FileSystemException
 
-from Constants import BLOCKSIZE, DISKSIZE, SEGMENTSIZE, NUMSEGMENTS
+from Constants import BLOCKSIZE, DISKSIZE, SEGMENTSIZE, NUMSEGMENTS, ACTUALBLOCKSIZE
 
 NUMBLOCKS = SEGMENTSIZE - 1 # number of blocks in a segment 
 #(one less than SEGMENTSIZE because of the superblock)
@@ -21,7 +21,8 @@ class SegmentManagerClass:
     # if no free block exists, find another segment with a free block in it
     # This accepts only a single block of data, returns the block allocated
     # Returns -1 if data >BLOCKSIZE or if disk ran out of memory
-    def write_to_newblock(self, data):
+    # Inodeid and blockoffset are part of meta data stored with each block
+    def write_to_newblock(self, data, inodeid, blockoffset):
         # XXX - do this tomorrow! after the meteor shower! - Okay bro!!
         if DEBUG:
             print "Inside SegmentManager:write_to_newblock for datasize :", len(data) #SEE
@@ -29,13 +30,13 @@ class SegmentManagerClass:
         if len(data) > BLOCKSIZE: # NOTE- Add exception later
             print "Inside SegmentManager:write_to_newblock :Data length greater than Block size for data :", data
             return -1
-        retval = self.currentseg.write_to_newblock(data[:BLOCKSIZE])
+        retval = self.currentseg.write_to_newblock(data[:BLOCKSIZE], inodeid, blockoffset)
         if retval == -1:
             result = self._flush_and_initialize_new_segment()
             if result == -1:
-                raise FileSystemException("Disk out space, exiting")
+                raise FileSystemException("Disk out of space, exiting")
             else:
-                retval = self.currentseg.write_to_newblock(data[:BLOCKSIZE])
+                retval = self.currentseg.write_to_newblock(data[:BLOCKSIZE], inodeid, blockoffset)
 
         return (retval + self.currentseg.segmentbase)
             
@@ -45,6 +46,8 @@ class SegmentManagerClass:
     # Returns -1 if no segment if present with a free block
     def _flush_and_initialize_new_segment(self):
         self.flush()
+        if DEBUG:
+                print "SegmentManager.Inside flush and initialize"
         for i in range(NUMSEGMENTS):
             self.segcounter = (self.segcounter+1)%NUMSEGMENTS
             self.currentseg = SegmentClass(self.segcounter)
@@ -54,11 +57,12 @@ class SegmentManagerClass:
 
 
     # read the requested block if it is in memory, if not, read it from disk
+    # this method only returns data and not the metadata 
     def blockread(self, blockno):
         if self.is_in_memory(blockno):
-            return self.read_in_place(blockno)
+            return self.read_in_place(blockno)[:BLOCKSIZE]
         else:
-            return Disk.disk.blockread(blockno)
+            return Disk.disk.blockread(blockno)[:BLOCKSIZE]
 
     # write the requested block, to the disk, or else to memory if
     # this block is part of the current segment
@@ -107,7 +111,7 @@ class SegmentManagerClass:
             if superblock.inodemapgeneration > 0 and superblock.inodemapgeneration > maxgen:
                 maxgen = superblock.inodemapgeneration
                 imlocation = superblock.inodemaplocation
-        return imlocation
+        return imlocation, maxgen
 
 class SuperBlock:
     def __init__(self, data=None):
@@ -146,8 +150,6 @@ class SegmentClass:
     def __init__(self, segmentnumber):
         self.segmentbase = segmentnumber * SEGMENTSIZE
         # read the superblock, it's the first block in the segment
-        #data=Disk.disk.blockread(self.segmentbase)
-        #print "1.Inside segment class :" + repr(data)
         self.superblock = SuperBlock(data=Disk.disk.blockread(self.segmentbase))
         self.blocks= []
         # read the segment blocks from disk, they follow the superblock
@@ -157,15 +159,19 @@ class SegmentClass:
     # write data to a free block within the segment. Since the
     # segment is in memory, the write only updates the blocks in
     # memory and does not have to touch the disk
-    def write_to_newblock(self, data):
+    def write_to_newblock(self, data, inodeid, blockoffset):
         for i in range(0, NUMBLOCKS):
             if not self.superblock.blockinuse[i]:
                 if len(data) > BLOCKSIZE:
                     print "Assertion error 2: data being written to segment is not the right size (%d != %d)" % (len(data), len(self.blocks[i]))
                     print data
                     os._exit(1)
-                # update the block data
-                self.blocks[i] = data + self.blocks[i][len(data):]
+
+                # update the block data and metadata
+                self.blocks[i] = data + self.blocks[i][len(data):BLOCKSIZE] + struct.pack("II", inodeid,blockoffset)
+                if len(self.blocks[i])!= ACTUALBLOCKSIZE:
+                    print "Alert3: Something went wrong"
+                
                 self.superblock.blockinuse[i] = True
                 # return the physical location of the block
                 return i + 1

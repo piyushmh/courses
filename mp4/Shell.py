@@ -43,6 +43,7 @@ class Shell:
             else:
                 print "Usage: mkfs [-reuse]"
                 return
+        #pdb.set_trace()
         Disk.disk = DiskClass(brandnew=brandnew)
         Segment.segmentmanager = SegmentManagerClass()
         InodeMap.inodemap = InodeMapClass()
@@ -65,6 +66,7 @@ class Shell:
         while len(str) < int(args[2]):
             str += repeatstr
         str = str[0:int(args[2])]
+        #pdb.set_trace()
         fd.write(str)
         fd.close()
 
@@ -74,7 +76,8 @@ class Shell:
         dd = LFS.filesystem.open(curdirpath, isdir=True)
         for name, inode in dd.enumerate():
             size, isdir = LFS.filesystem.stat("%s%s%s" % (curdirpath, '/' if curdirpath[-1:] != '/' else '', name))
-            print "%s\tinode=%d\ttype=%s\tsize=%d" % (name, inode, "DIR" if isdir else "FILE", size)
+            print "{:<10}  inode={:<3}  type={:<4}  size={:<5}".format(name, inode, "DIR" if isdir else "FILE", size)
+
 
     def cat(self, args):
         if len(args) != 2:
@@ -98,6 +101,7 @@ class Shell:
         if len(args) != 2:
             print "Usage: mkdir dirname"
             return
+        #pdb.set_trace()
         LFS.filesystem.create(canonicalize(args[1], self.currentDirectory), isdir=True)
 
     def cd(self, args):
@@ -115,6 +119,7 @@ class Shell:
 
     # writes the contents of all in-memory data structures to the disk
     def sync(self, args):
+        pdb.set_trace()
         LFS.filesystem.sync()
 
     def rm(self, args):
@@ -122,7 +127,6 @@ class Shell:
         if len(args)!=2:
             print "Usage: rm filename"
             return
-        pdb.set_trace()
         LFS.filesystem.unlink(canonicalize(args[1], self.currentDirectory))
         
 

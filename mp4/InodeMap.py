@@ -1,6 +1,7 @@
 import struct
 import Segment
 from Segment import SegmentClass
+from Constants import INODEIDENTIFIEROFFSET
 
 DEBUG = False
 # the task of the InodeMap is to map inodes to their
@@ -23,7 +24,7 @@ class InodeMapClass:
     def update_inode(self, inodeid, inodedata):
         if DEBUG:
             print "Inside InodeMapClass:update_inode for inodeid :", inodeid
-        inodeblockloc = Segment.segmentmanager.write_to_newblock(inodedata)
+        inodeblockloc = Segment.segmentmanager.write_to_newblock(inodedata, inodeid,INODEIDENTIFIEROFFSET)
         if DEBUG:
             print "Inside InodeMapClass:update_inode for blockid :", inodeblockloc
         self.mapping[inodeid] = inodeblockloc

@@ -2,12 +2,14 @@ import sys, struct, os, random, math, pickle
 import Disk
 import Segment
 import InodeMap
+from FSE import FileSystemException
+
 import pdb
 
 from InodeMap import InodeMapClass
-from Constants import BLOCKSIZE
+from Constants import BLOCKSIZE , INDIRECTBLOCKOFFSET, MAXDATABLOCKSINODE, NUMDIRECTBLOCKS
 
-NUMDIRECTBLOCKS = 1 # can have as many as 252 and still fit an Inode in a 1024 byte block
+
 inodeidpool = 1  # 1 is reserved for the root inode
 
 def getmaxinode():
@@ -62,6 +64,7 @@ class Inode:
     # physical address for that block, updates the inode to
     # point to that particular block
     # Adding code for indirect blocks as well
+    # caller should make sure that the blockoffset would fit in a inode
     def _adddatablock(self, blockoffset, blockaddress):
         if blockoffset < len(self.fileblocks):
             # place this block in one of the direct data blocks
@@ -84,7 +87,7 @@ class Inode:
                 newdata += struct.pack("I",blockaddress)
                 newdata += data[(blockoffset+1)*4:]
 
-            self.indirectblock = Segment.segmentmanager.write_to_newblock(newdata)
+            self.indirectblock = Segment.segmentmanager.write_to_newblock(newdata,self.id, INDIRECTBLOCKOFFSET)
 
     def _datablockexists(self, blockoffset):
         if blockoffset < len(self.fileblocks):
@@ -104,21 +107,22 @@ class Inode:
             
 
     # given the number of a data block inside a file, i.e. 0 for
-    # the first block, 1 for the second and so forth, returnss
+    # the first block, 1 for the second and so forth, returns
     # the contents of that block as a string
     # Adding support for indirect blocks
     def _getdatablockcontents(self, blockoffset):
         if blockoffset < len(self.fileblocks): #this is a direct block
             blockid = self.fileblocks[blockoffset]
         else:
-            # XXX - do this after the meteor shower! - ok!!
             indirectblockid = self.indirectblock
             indirectblockcontent = Segment.segmentmanager.blockread(indirectblockid)
             blockid = self._read_from_indirect_block(indirectblockcontent, blockoffset - len(self.fileblocks))
+        #Here we are returning only the data contained in the block, not the metadata
         return Segment.segmentmanager.blockread(blockid)
 
     # Read from indirect block, blockcontent is the content of the 
-    # indirect block and the offset is the offset in its  
+    # indirect block and the offset is the offset in it. This is assuming
+    # an indirect block contains pointers to BLOCKSIZE/4 data blocks
     def _read_from_indirect_block(self,blockcontent, blockoffset):
         print "Inside Inode:_read from indirect block for offset ",blockoffset
         if blockoffset < (BLOCKSIZE/4):
@@ -149,15 +153,21 @@ class Inode:
         return data[0:min(len(data), amounttoread)]
 
     # perform a write of the given data, starting at the file offset
-    # provided below. Sheer brilliance:)
+    # provided below. 
+    # Throws error when data does not fit in the max number of blocks
+    # in a file.
+    # Sheer brilliance:)
     def write(self, offset, data, skip_inodemap_update=False):
         size = len(data)
         currentblock = int(math.floor(float(offset) / BLOCKSIZE))
         inblockoffset = offset % BLOCKSIZE
         moretowrite = size
         while moretowrite > 0:
+            if currentblock >= MAXDATABLOCKSINODE:
+                raise FileSystemException("Data exceeded max file size")
+           
             # check to see if the file has any data blocks at all
-            if self._datablockexists(currentblock): #CHANGE ME TO ADD INDIRECT BLOCKS
+            if self._datablockexists(currentblock):
                 # get the old data from the block
                 olddata = self._getdatablockcontents(currentblock)
                 # slice and dice so we combine the new data with the old
@@ -165,7 +175,7 @@ class Inode:
             else:
                 newdata = data[0:BLOCKSIZE]
             # allocate a new data block
-            datablock = Segment.segmentmanager.write_to_newblock(newdata)
+            datablock = Segment.segmentmanager.write_to_newblock(newdata, self.id, currentblock)
             self._adddatablock(currentblock, datablock)
             moretowrite -= (BLOCKSIZE - inblockoffset)
             data = data[(BLOCKSIZE - inblockoffset):]

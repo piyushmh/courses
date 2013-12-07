@@ -1,6 +1,6 @@
 import struct, os
 
-from Constants import DISKSIZE, BLOCKSIZE
+from Constants import DISKSIZE, ACTUALBLOCKSIZE
 # Disk provides no synchronization; all synch operations should
 # take place at a higher level in the software stack inside the
 # file system!
@@ -36,10 +36,10 @@ class DiskClass:
             print "Writing block #%d to the disk" % blocknumber
         if blocknumber > self.getnumberofblocks():
             raise DiskException("Block Out Of Bound")
-        if len(data) > BLOCKSIZE:
+        if len(data) > ACTUALBLOCKSIZE:
             raise DiskException("Data Exceeds Size Of Block")
         # we need to modify this item on disk
-        self.disk.seek(blocknumber * BLOCKSIZE, 0)
+        self.disk.seek(blocknumber * ACTUALBLOCKSIZE, 0)
         self.disk.write(data)
         self.disk.flush()
         return 0
@@ -49,17 +49,17 @@ class DiskClass:
             print "Reading block #%d from the disk" % int(blocknumber)
         if blocknumber > self.getnumberofblocks():
             raise DiskException("Block Out Of Bound")
-        self.disk.seek(blocknumber * BLOCKSIZE, 0)
-        return self.disk.read(BLOCKSIZE)
+        self.disk.seek(blocknumber * ACTUALBLOCKSIZE, 0)
+        return self.disk.read(ACTUALBLOCKSIZE)
 
     def getblocksize(self):
-        return BLOCKSIZE
+        return ACTUALBLOCKSIZE
 
     def getcapacity(self):
         return DISKSIZE
 
     def getnumberofblocks(self):
-        return DISKSIZE/BLOCKSIZE
+        return DISKSIZE/ACTUALBLOCKSIZE
 
     def closedisk(self):
         self.disk.close()
