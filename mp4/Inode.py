@@ -124,7 +124,8 @@ class Inode:
     # indirect block and the offset is the offset in it. This is assuming
     # an indirect block contains pointers to BLOCKSIZE/4 data blocks
     def _read_from_indirect_block(self,blockcontent, blockoffset):
-        print "Inside Inode:_read from indirect block for offset ",blockoffset
+        if DEBUG:
+            print "Inside Inode:_read from indirect block for offset ",blockoffset
         if blockoffset < (BLOCKSIZE/4):
             blockid = struct.unpack("I", blockcontent[blockoffset*4:(blockoffset+1)*4])[0]
             return blockid
@@ -156,12 +157,15 @@ class Inode:
     # provided below. 
     # Throws error when data does not fit in the max number of blocks
     # in a file.
-    # Sheer brilliance:)
     def write(self, offset, data, skip_inodemap_update=False):
         size = len(data)
         currentblock = int(math.floor(float(offset) / BLOCKSIZE))
         inblockoffset = offset % BLOCKSIZE
         moretowrite = size
+        
+        if (size/BLOCKSIZE) >= MAXDATABLOCKSINODE:
+                raise FileSystemException("Data exceeded max file size")
+        
         while moretowrite > 0:
             if currentblock >= MAXDATABLOCKSINODE:
                 raise FileSystemException("Data exceeded max file size")
@@ -185,3 +189,21 @@ class Inode:
         self.filesize = max(self.filesize, offset + size)
         if not skip_inodemap_update:
             InodeMap.inodemap.update_inode(self.id, self.serialize())
+
+    def find_datablock_by_offset(self,blockoffset):
+        if blockoffset < len(self.fileblocks):
+            if not self.fileblocks[blockoffset]:
+                return -1
+            else:
+                return self.fileblocks[blockoffset]
+        else:
+            if self.indirectblock == 0:
+                return -1
+            else:
+                blockoffset -= len(self.fileblocks)
+                data = Segment.segmentmanager.blockread(self.indirectblock)
+                blockid = struct.unpack("I", data[4*blockoffset:4*(blockoffset+1)])[0]
+                if not blockid:
+                    return -1
+                else:
+                    return blockid

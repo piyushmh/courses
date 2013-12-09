@@ -2,10 +2,9 @@
 import sys, struct, os, random, time
 import Disk
 from FSE import FileSystemException
+from Cleaner import SegmentMonitor
+from Constants import BLOCKSIZE, DISKSIZE, SEGMENTSIZE, NUMSEGMENTS, ACTUALBLOCKSIZE, NUMBLOCKS
 
-from Constants import BLOCKSIZE, DISKSIZE, SEGMENTSIZE, NUMSEGMENTS, ACTUALBLOCKSIZE
-
-NUMBLOCKS = SEGMENTSIZE - 1 # number of blocks in a segment 
 #(one less than SEGMENTSIZE because of the superblock)
 
 DEBUG = False
@@ -13,9 +12,11 @@ DEBUG = False
 # the segmentmanager manages the current segment, flushing it
 # to disk as necessary and picking up another segment to work on
 class SegmentManagerClass:
-    def __init__(self):
+    def __init__(self, segmentmonitor):
         self.segcounter = 0
-        self.currentseg = SegmentClass(self.segcounter)
+        self.segmentmonitor = segmentmonitor
+        if self.segmentmonitor.acquire_segment_lock(self.segcounter)==1:
+            self.currentseg = SegmentClass(self.segcounter)
 
     # write the given data to a free block in the current segment.
     # if no free block exists, find another segment with a free block in it
@@ -46,13 +47,17 @@ class SegmentManagerClass:
     # Returns -1 if no segment if present with a free block
     def _flush_and_initialize_new_segment(self):
         self.flush()
-        if DEBUG:
+        self.segmentmonitor.release_segment_lock(self.segcounter)
+        if True:
                 print "SegmentManager.Inside flush and initialize"
         for i in range(NUMSEGMENTS):
             self.segcounter = (self.segcounter+1)%NUMSEGMENTS
-            self.currentseg = SegmentClass(self.segcounter)
-            if self.currentseg.check_if_segment_has_free_block() == 1:
-                return 1
+            if self.segmentmonitor.acquire_segment_lock(self.segcounter)==1:
+                self.currentseg = SegmentClass(self.segcounter)
+                if self.currentseg.check_if_segment_has_free_block() == 1:
+                    return 1
+                else:
+                    self.segmentmonitor.release_segment_lock(self.segcounter)   
         return -1
 
 
@@ -168,6 +173,8 @@ class SegmentClass:
                     os._exit(1)
 
                 # update the block data and metadata
+                if (inodeid==0):
+                    print "Something went wrong check"
                 self.blocks[i] = data + self.blocks[i][len(data):BLOCKSIZE] + struct.pack("II", inodeid,blockoffset)
                 if len(self.blocks[i])!= ACTUALBLOCKSIZE:
                     print "Alert3: Something went wrong"
@@ -177,7 +184,7 @@ class SegmentClass:
                 return i + 1
         return -1
 
-    #This first flushinges the serialized version of superblock and then all
+    #This first flushes the serialized version of superblock and then all
     # the blocks in the segment
     def flush(self):
         #write the superblock to disk
