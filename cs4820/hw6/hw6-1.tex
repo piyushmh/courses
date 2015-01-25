@@ -1,0 +1,110 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand*\Th[1]{{#1}^{\textrm{th}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 6, Problem 1}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\bigskip
+
+\textbf{(1)}
+\emph{(5 points)}
+Design a linear-time algorithm that tests whether a given flow 
+is a maximum flow. The input to the algorithm is a flow network $G$
+and a flow $f$ in $G$; the output should be an answer to the 
+question, ``Is $f$ a maximum flow?'' You may assume that $G$ has
+integer edge capacities and that $f$ is an integer-valued flow.
+Your algorithm's running time should be $O(m+n)$, 
+where $m$ and $n$
+are the number of edges and vertices in $G$, respectively.
+
+\bigskip
+\subsection{Solution}
+We can solve this problem by first building a residual graph and then checking if there is some simple path from the source S to sink T by running DFS. If such a path exists, we know that this flow is not a maximum flow since we can find an augmenting path which would increase the flow value to something higher. We will output No. If such a path does not exists, this is equivalent to the terminating condition in Ford Fulkerson algorithm which basically means that the flow given to us was indeed a maximum flow. We will output Yes.
+\subsection{Proof of correctness}
+
+We can show correctness by the face that if this flow was not the maximal flow, we would definitely find a path from S to T and using that augmenting path, find a flow with a greater value. If there is no such path, this is equivalent to the terminating condition in Ford Fulkerson. Hence assuming the correctness of FF algorithm, this algorithm will work correctly.
+\subsection{Running Time}
+
+Building the residual graph take $O(m+n)$ time. Searching for a path using DFS takes $O(m)$ time. Hence the total time is $O(m+n)$.
+\end{document}

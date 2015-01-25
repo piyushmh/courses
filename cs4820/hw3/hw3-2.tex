@@ -1,0 +1,286 @@
+\documentclass[12pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 3, Problem 2}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: Eeshan Wagh
+}
+
+\bigskip
+
+\textbf{(2)}
+\emph{(10 points)}
+You're consulting for the state highway authority
+on a project to determine where they should place
+speed limit signs on a new highway.  Assume that
+the highway has a length of $L$ miles, and that
+points on the highway are identified by non-negative
+numbers $d$ representing their distance from the west
+endpoint.  The highway authority wants
+to enforce two types of speed constraints: a
+maximum speed of $s_{\mathrm{max}}$ miles per hour,
+which applies to
+the entire length of the highway, and local
+speed limits which can be expressed by ordered
+pairs of integers $(s_i,d_i)$ expressing the
+constraint that the cars should be moving at a
+speed \emph{no faster than} $s_i$ miles per hour
+when passing
+through point $d_i$ on the highway.  There are
+$n$ such constraints, numbered $(s_1,d_1)$
+through $(s_n,d_n)$ with $d_1< d_2< \cdots < d_n$.
+
+A speed limit sign is designated by a pair of
+integers $(s,d)$, meaning that at point $d$ on
+the highway there is a sign telling drivers that
+their speed must be at most $s$ when traveling
+between $d$ and $d'$, where $d'>d$ is the
+position of the next speed limit sign on
+the highway, or $d'=L$ if there are no
+speed limit signs after $d$.
+For reasons that make sense only to bureaucrats
+and CS 4820 professors, the highway authority has
+decided that they can only use $k$ speed limit
+signs, where $k$ is a positive number less than
+$n$.
+A collection of speed limit
+signs is \emph{valid} if:
+\begin{enumerate}
+\item There are at most $k$ signs.
+\item One of the signs is at the highway's starting point, i.e.~at $0$.
+\item
+A driver who obeys the posted speed limits
+cannot possibly violate the maximum speed constraint
+$s_{\mathrm{max}}$, nor any of the local
+constraints $(s_1,d_1),\ldots,(s_n,d_n)$.
+\item None of the signs is located at a point in the set
+$\{d_1,\ldots,d_n\}$.
+\end{enumerate}
+Subject to these conditions,
+the highway authority wants to allow drivers
+to get from $0$ to $L$ as rapidly as possible
+while obeying the speed limits.  Design an
+efficient algorithm that computes the minimum
+time $T$ such that there is a valid collection
+of speed limit signs allowing drivers to
+get from $0$ to $L$ in $T$ hours.
+\\\\
+\subsection{Solution}
+
+\subsubsection{Building the algorithm}
+
+\begin{lemma}
+If the allowed limit for any driver is s between any two points, then the driver should drive at the max speed possible.
+\end{lemma}
+\begin{proof}
+The proof directly follows from the fact that we want to minimize the time it takes to cross the road. The driver would only follow the speed signs which decides the maximum speed possible.
+\end{proof}
+
+\begin{lemma} Any optimal solution will place speed limit signs at $d_i \pm 1$
+\end{lemma}
+\begin{proof}
+If suppose we place any speed limit sign (s,d) such that d lies between some $d_i, d_{i+1}$ and $d\neq \{d_i + 1 ,d_{i+1}-1\} $. Suppose a driver was moving at speed s' when it entered this interval which means that the previous speed limit sign was s'. The driver will be driving at maximum driving speed possible by lemma 1. Now there can be two cases :
+\begin{enumerate}
+\item s' $<$ s : In this case if speed increases upon hitting the speed limit sign within the interval. So having it at $d_{i+1} - 1$ will minimize the travel time without violating the constraint at $d_{i+1}$.
+\item s' $>$ s : In this case if speed decreases upon hitting the speed limit sign within the interval. So having it at $d_{i} + 1$ will minimize the travel time without violating the constraint at $d_{i}$.
+\end{enumerate}
+So in both the cases we get a lower travel time by having the speed limit sign at $d_i\pm 1$. Hence the lemma holds.
+\end{proof}
+
+Now we know that the only possible places where we can place the speed limit signs are $d_i \pm 1$ and 0. Let P  = $\{ p_1,p_2, ... p_m\}$be the set of all possible such values such that each element is less than equal to L. Let M be the size of set P. If we put a speed limit sign at any $p_i$, we will get a sub problem with a smaller value of k. If we want to know the time it takes to reach some $p_i$ using at most k speed signs, all we need to know is the time it took to reach the speed sign before it at some $p_j$ using k-1 speed limit sign and we can calculate the speed limit we should put between speed limit signs k-1 and k by calculating the maximum speed that the constraints allow. This will make sure that we don't break any constraints. Let d(a,b) be the minimum time it takes to reach $p_a$ using atmost b speed limit signs. We have the following recurrence - \\
+
+d(a,b) = min\{ d(c,b-1) + $(p_a - p_c)/s_{ac}$\} $\forall c < a $
+
+Here $s_{ij}$ represents the time the maximum speed a driver can have between $p_i$ and $p_j$ without breaking any speed constraints. Since this $s_{ij}$ will be used for every d(a,b) we can calculate as as part of pre computation step. The way we do that is first we initialize all s(i,j) to $s_{max}$. Then for every local constraint $s_j$ we find the pair $p_i$, $p_j$ between $s_j$ lies. Since we can have the array P sorted, we can use binary search to do that. Now we have all possible s(i,i+1) initialized for all local constraints. Now we find s(i,j) for bigger values of j-i by using the smaller intervals which have already been computed. This is shown in lines 11-18.
+
+After we calculate all values of d(a,b) the minimum time it takes to cross the road would be - \\\\
+min\{ dp(i,k) + (L - $p_i$)/ $S_{iL}$\} $\forall i$ from  1 to M. \\\\
+We can calculate $s_{iL}$ which the maximum speed allowed from $p_i$ to L following all constraints as part of precomputation as well. \\\\Once we find d(i,j) for all values of i,j ,then it minimum time to reach the end of the road is simply d(i,k-1) for any $p_i$ plus the time it takes to go from $p_i$ to L. This fact is basically saying that the last speed sign we place is on $p_i$ and hence the formula follows.
+
+mintime = min{ d(i,k-1) + S(i,L) }$\forall i$ from 1 to M
+
+\subsubsection{Algorithm}
+\begin{algorithm}[H]
+  \caption{}
+  \begin{algorithmic}[1]
+	\Procedure{MinRoad\_Cross}{$T\lbrack \rbrack, E\lbrack\rbrack , X\lbrack\rbrack$}
+		\Let{$P\lbrack 1...2N+1 \rbrack$}{$0 \forall i $}\Comment{P is the array of set of valid speed sign positions}
+		\Let {$P \lbrack 0 \rbrack$} {0}	\Comment{Add 0 to the list of valid speed signs}	
+		
+		\Let{$C\lbrack{i,j}\rbrack$}{$(s_i, d_i)$} $\forall n$ \Comment{Store the constraints in an sorted order such that $d_1 < .. <d_n$ }
+		
+		\hskip 9pt plus 3pt minus 1pt		
+		
+		\ForAll{$i = 1 - N$}
+			\If {$ d_i - 1 \leq L$}
+				\State ${P\lbrack \rbrack} \gets {d_i - 1} $ \Comment { Add element $d_i - 1$to the list}
+			\EndIf 
+			\If {$ d_i + 1 \leq L$}
+				\State ${P\lbrack \rbrack} \gets {d_i + 1}$ \Comment { Add element $d_i + 1$ to the list}
+			\EndIf
+		\EndFor
+		
+		\hskip 9pt plus 3pt minus 1pt		
+		
+		\Let {$s\lbrack 1...m, 1..m \rbrack$}{$s_{max} \forall i,j$}		\Comment {Initialize the max speed matrix to $s_{max}$}
+		
+		\hskip 9pt plus 3pt minus 1pt		
+		
+		\ForAll {$s_i, d_i$ in $C\lbrack \rbrack$}	\Comment{This loop sets the base cases in max speed matrix}
+			\State $j \gets {binary-search(P\lbrack \rbrack , d_i)}$	\Comment{ Find largest $p_i < d_i$ using BS since P[] is sorted}
+			\State {$s(i,i+1) \gets {min( s(i,i+1), d_i) }$}
+		\EndFor
+		
+		\Let{M}{size of $P\lbrack \rbrack$}
+		\ForAll{l = 2 to M}
+			\ForAll{ i = 1 to M - l +1}
+				\State $j \gets {i + l -1}$
+				\State $s(i,j) \gets {min( s(i,i+1) , s(i+1,j) )}$
+			\EndFor
+		\EndFor
+				
+		\hskip 9pt plus 3pt minus 1pt
+		
+		\Let{$d\lbrack 1..m, 1..k \rbrack $}{0}\Comment{d(i,j) represents the minimum time it takes to each $p_i$ with upto j speed signs}
+		
+		\hskip 9pt plus 3pt minus 1pt
+
+		\Let {dp(1,i)}{0} $\forall i$ from 1 to k \Comment{Since $p_1$ is 0, hence the time taken from beginning to that point using any number of speed signs is 0}
+		
+		\hskip 9pt plus 3pt minus 1pt
+		\Let {dp(i,1)}{$p_i / s(1,i)$} $\forall i$ from 1 to M \Comment{Since the first speed sign is always at 0, any d(i,1) would simply be the distance $p_i$ divided by maximum allowed speed from $p_1$ to $p_i$} 
+		
+		\hskip 9pt plus 3pt minus 1pt
+		\ForAll{a = 2 to M}
+			\ForAll{ b = 2 to k}
+				\State d(a,b) = INF
+				\ForAll{c = 1 to a-1}
+					\If { d(a,b) $>$ (d(c,b-1) + ($p_a - p_c$)/ $s(a,c)$)}
+					\State d(a,b) $=$ (d(c,b-1) + ($p_a - p_c$)/ $s(a,c$)
+					\EndIf
+				\EndFor
+			\EndFor
+		\EndFor
+		
+		\hskip 9pt plus 3pt minus 1pt
+		\Let {S(i,L)}{$s_{max}$}\Comment{S(i,L) represent the maximum speed between $p_i$ and L}
+		\ForAll{i = M-1 to 1}
+			\State S(i,L) $\gets$ {$s(i,M)$}\Comment{Except the final value i.e $p_m$, this is equal to $s(i,M)$}
+		\EndFor
+		
+		\hskip 9pt plus 3pt minus 1pt
+		\Let{mintime}{INF}
+		\ForAll{i = 1 to M}
+			\If{mintime $>$ (d(i,k-1) + S(i,L) )}
+				\State mintime  = d(i,k-1) + S(i,L)
+			\EndIf
+		\EndFor
+		\State \Return{mintime}
+	\EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+\subsubsection{Proof of correctness}
+\begin{proof}
+
+We will prove this by induction. We claim that d(i,j) is the minimum time it takes to reach $p_i$ by using at most j speed signs. 
+\\\\
+Base case -
+Base cases are defined on line 20 and 21 of the algorithm. dp(i,1) = $p_i / s(1,i) \forall i$. This follows from the fact that the first speed sign has to be places on location 0. Hence the its speed has to the maximum speed allowed between the constraints places between 1 and $p_i$. Also d(1,i) = 0 $\forall i$. This is because $p_i$ is 0 and the time taken to each 0 is 0 for any number of speed signs.
+\\\\
+Inductive Step  - 
+Consider d(i,j). From the inductive hypothesis we know that d(m,n) is equal to opt(m,n) $\forall m < i , n<j$. Now from the discussion above we know that \\\\
+opt(a,b) = min\{ opt(c,b-1) + $(p_a - p_c)/s_{ac}$\} $\forall c < a $\\\\
+Using the inductive hypothesis we have\\\\
+opt(a,b) = min\{ d(c,b-1) + $(p_a - p_c)/s_{ac}$\} $\forall c < a $\\\\
+opt(a,b) = d(a,b)
+\end{proof}
+\subsubsection{Complexity Analysis}
+
+The maximum value of M can be 2N+1. Hence $O(M) = O(n)$
+
+\begin{enumerate}
+\item Line 5 - 9 takes $O()$
+\item Line 12 takes $O(logn)$. Hence lines 11-13 take $O(nlogn)$
+\item Line 15-18 takes $O(M^2) = O(n^2)$
+\item Line 22-27 takes $O(M^2k) = O(n^2k)$
+\item Line 28-20 takes $O(M) = O(n)$
+\item Line 31-34 takes $O(M) = O(n)$
+\end{enumerate}
+
+Total time complexity = $O(n)$ + $O(nlogn)$ + $O(n^2)$ + $O(n^2k)$ + $O(n)$ + $O(n)$ = $O(n^2k)$
+\\\\
+Total Space Complexity  = $O(M^2) + O(Mk)$. Since $k < n$ and $O(M) = O(n)$\\
+Total Space Complexity  = $O(n^2)$
+\end{document}

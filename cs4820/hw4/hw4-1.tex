@@ -1,0 +1,192 @@
+\documentclass[12pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand*\Th[1]{{#1}^{\textrm{th}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 4, Problem 1}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\bigskip
+
+\textbf{(1)}
+If $P$ is a convex polygon in the plane, a \emph{triangulation} 
+of $P$ is a way of dividing it up into triangles whose 
+corners are vertices of $P$.  More precisely, a 
+triangulation of $P$ consists of a set of line segments
+$\mathbf{L}=\{L_1,\ldots,L_r\}$ and a set of triangles 
+$\mathbf{T}=\{T_1,\ldots,T_s\}$ satisfying the following properties.
+\begin{enumerate}
+\item  For each segment $L_i \in \mathbf{L}$, the
+endpoints of $L_i$ are vertices of $P$.
+\item  For each triangle $T_j \in \mathbf{T}$, the
+sides of $T_j$ are segments in $\mathbf{L}$.
+\item  No two segments in $\mathbf{L}$ cross each
+other in the plane.  In other words, any two
+segments $L_i, L_j \in \mathbf{L}$ are either
+disjoint or they have a unique point of intersection
+that is an endpoint of both segments.
+\item  Every side of the polygon $P$ is a side of exactly
+one triangle $T_j \in \mathbf{T}$.
+\item  Every segment $L_i \in \mathbf{L}$ that is not a 
+side of $P$ is a side of exactly two triangles $T_j, T_k \in \mathbf{T}.$
+\end{enumerate}
+
+Suppose that $P$ is a convex polygon in the plane and that you
+are given an input consisting of the following information:
+\begin{itemize}
+\item
+a list of the vertices $v_1,v_2,\ldots,v_n$ of $P$, in clockwise 
+order;
+\item
+a positive integer cost $c(i,j)$ that denotes the cost of 
+creating a line segment from $v_i$ to $v_j$.  These
+costs are defined whenever $1 \leq i < j \leq n$.
+\end{itemize}
+For any triangulation of $P$, the cost of the triangulation
+is defined to be the sum of the costs of the line segments
+included in the set $\mathbf{L}$.
+Design an algorithm to compute the minimum cost of a 
+triangulation of $P$.
+
+\subsection{Solution}
+\begin{lemma} Both vertices of any edge (u,v) of the polygon will be connected to some vertex w in any possible triangulation.
+\begin{proof}
+Suppose in any possible triangulation vertices u,v of an edge are connected to different vertices x and y. Without loss of generality we can assume that u,v,x,y follow a clockwise order. If $x \neq y$ then the edge u,v is not part of any triangle since the line segments they are part of must not cross each other. This means there must be some other x' and y' between x and y which are also connected to vertices u,v. Now using the same argument on x' and y' we can find another pair x'' and y''. Eventually these vertices will converge since there are a finite number of vertices and hence u, v will be connected to the same vertex. This proves the lemma.
+\end{proof}
+\end{lemma}
+
+Now let opt(i,j) be the minimum cost of triangulation of the polygon formed by vertices i to j taken in clockwise order. Now from lemma 1 we know that there must be some k between i and j to which i and j must be connected and they will form a triangle. So the cost of such a triangulation will be the cost of the triangulation of polygon i to k, plus the cost of triangulation of polygon k to j plus the cost of the triangle formed for i , k , j. Since there are only i - j -1 such values of k, we can calculate the minimum over all values of k and we will get the minimum cost of triangulation of the polygon between i and j.
+\\\\
+opt(i , j) = $c_{ij}$ for $\forall i, j$ such that  j - 1 = 1
+
+opt(i , j) =  $min_{k = i+1 to j-1}$ { opt(i ,k) + opt(k , j) + $c_{ij}$}
+\\\\
+This recurrence gives us a way to calculate opt(i,j) for all values of i, j such that 1 $\leq$ i $<$ j $\leq$ n . The final answer will be given by opt(1,n). We can observe that while calculating opt(i,j) we depend upon sub problems opt(m,n) such that $ | m - n | < | i - j| $ . Thus we can calculate all the value of opt(i,j) in increasing order of $| i - j|$.
+
+\begin{algorithm}[H]
+  \caption{}
+  \begin{algorithmic}[1]
+	\Procedure{Min-Triangulation}{}
+		\Let{$opt\lbrack{i,j}\rbrack$}{$INF$} $\forall$ i, j such that 1 $\leq$ i $<$ j $\leq$ n \Comment{ Initialize the table opt}
+
+		\ForAll{len = 1 to n}
+			\ForAll{i = 1 to n - len - 1 }	
+					\State{j} $\gets$ {i+len}
+					\If { j = i + 1}
+						\State{opt(i,j)} $\gets$ {$c_{ij}$} \Comment{This is the base case}
+					\Else		
+						\ForAll{k = i+1 to j-1}	
+							\State{opt(i,j)} $\gets$ {min{ (opt(i,j), opt(i ,k) + opt(k , j) + $c_{ij}$ }}
+						\EndFor
+					\EndIf	
+			\EndFor
+		\EndFor
+
+		\State \Return{opt(1,n)}
+	\EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+\subsection{Proof of correctness}
+
+We can prove this by induction. We claim that opt(i,j) contains the minimum triangulation cost of the polygon formed by vertices from i to j. 
+\\\\
+Base case : When j - 1 = 1, this means that the polygon is just a edge of the polygon and the cost of triangulating it would be simply the cost of that edge.
+\\\\
+opt(i , j) = $c_{ij}$ for $\forall i, j$ such that  j - 1 = 1
+\\\\
+Inductive Step : From lemma 1 we know that the polygon formed by vertices from i to j can be triangulated by choosing a k between i and j, triangulating the polygon from i to k , then triangulation the polygon from k to j and then adding the triangle i , k , j. So the minimum cost of triangulating a polygon which has a triangle i, k, j can be found by adding the min cost of triangulating polygon (i,k) plus min cost of triangulating polygon (k,j) plus the cost of triangle i, k, j. And to find the min cost of triangulation of polygon i,j we can consider all such k's and take a minimum over them. Note that we are adding only cost of $c_{ij}$ since the cost of the other vertices of the triangle will be included in the other two vertices.
+\\\\
+optimal(i , j) =  $min_{k = i+1 to j-1}$ { optimal(i ,k) + optimal(k , j) + $c_{ij}$}
+
+From our inductive hypothesis we know that opt(i,k) and opt(k, j) are the optimal costs of the triangulating the polygons i,k and k,j respectively. 
+Hence we have 
+
+optimal(i , j) =  $min_{k = i+1 to j-1}$ { opt(i ,k) + opt(k , j) + $c_{ij}$} = opt(i,j)
+\\\\
+Hence the induction holds.
+
+
+\subsection{Running Time}
+
+We have O($n^2$) sub problems and each takes O(n) time (line 9-10) to solve. So the total running time is O($n^3$)
+\end{document}

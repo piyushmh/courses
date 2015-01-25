@@ -1,0 +1,128 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand*\Th[1]{{#1}^{\textrm{th}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 6, Problem 2}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\bigskip
+
+\textbf{(2)}
+\emph{(10 points)}
+Design a linear-time algorithm that recomputes a maximum flow in a
+network after the capacity of one edge is decremented. The input 
+to the algorithm consists of:
+\begin{compactitem}
+\item a flow network $G$ with integer edge capacities,
+\item a integer flow $f$ that is a maximum flow in $G$,
+\item an edge $e=(u,v)$.
+\end{compactitem}
+If $G'$ denotes the flow network obtained
+% The output should be a maximum flow in the network obtained
+from $G$ by decreasing the capacity of edge $e$ to $c(u,v)-1$,
+then your algorithm should output a maximum flow in $G'$, and
+it should run in time $O(m+n)$,
+where $m$ and $n$
+are the number of edges and vertices in $G$, respectively.
+
+\bigskip
+
+\subsection{Solution}
+
+Let the edge whose capacity is decremented by be $e = u,v$. If the edge wasn't fully saturated which means that f(e) $\neq$ c(e), then the maximum flow remains unaltered by this operation.
+
+If $f(e) = c(e)$, then we have the following case - \\
+the outgoing flow on node u will be one less than the incoming flow at node u. Similarly the outgoing flow on node v will be one more than the incoming flow on v. Thus we will build the residual graph $G'$ from $G$ and look for a path from u to v so that the flow can be increased by one. If we find such a path, we will augment the maximum flow $f$ with this path. This will make sure that the flow property at each node is satisfied.
+
+If we don't find such a path, then we must reduce the flow from s to u and from v to t with one unit. We will do this by finding a path from from u to s and from t to v. Then we will increment the flow on the edges on these paths by 1 ( we do this because these paths are in the opposite direction). Also we are guaranteed to find such paths since we had a flow from s to t via u-v. This operation will give us the new maximum flow $f$.
+
+\subsection{Proof of correctness}
+
+The proof of correctness comes from the properties of residual graph. Firstly maximum flow can never increase by decrementing an edge simply because we are not increasing any values in the residual graph. 
+
+If the edge is not saturated in the max flow then decrementing it does not change the maximum flow simply because this operating does not add any paths from s-t. 
+
+In the other case, it's evident that if we can find a path u-v in the residual graph then we can direct the missing 1 unit of flow along that path and our maximum flow value would not change and we can find the new maximum flow by augmenting the existing max flow $f$ with this path. When such a path does not exist, the max flow value will decrease and we find paths $u-s$ and $t-v$ so that we can maintain the flow properties at all the nodes. The new flow vector can be found by augmenting these two paths to the existing flow vector $f$.
+\subsection{Running Time}
+The slowest step in this algorithm is finding a path from $u-v$ which can take $O(m + n)$. If we don't find such a path we look for paths from u to s and from t to v which takes $O(m+n)$ again. It takes $O(m+n)$ to build the residual graph as mentioned in the class. Hence the total running time is $O(m+n)$
+\end{document}

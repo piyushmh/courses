@@ -1,0 +1,162 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 8, Problem 2}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\medskip
+\textbf{Hand in your solutions electronically using CMS.
+Each solution should be submitted as a separate file.
+For multi-part problems, all parts of the solution to that problem should be included in a single file.}
+
+\textbf{Remember that when a problem asks you to design an algorithm, you must also prove the algorithm's correctness and analyze its running time.
+The running time must be bounded by a polynomial function of the input size.}
+
+\bigskip
+
+\textbf{(2)}
+Exercise 11 in Chapter 8
+
+\subsection{Solution}
+
+\textbf{Plot Fulfillment is in NP}\\
+A certificate to plot fulfillment would be valid path from s to t. First we will check if path from s-t is a simple path or not. This is can easily be done in polynomial time by just checking if any vertex is repeated more than once. Also we need to check if atleast one vertex in each of the $T_i$ is visited at least once. We can check this by checking this for each $T_i$ in polynomial time since the number of $|T_i| \leq |V|$. Since there can only only be maximum of $k$ sets, this whole check can be done in polynomial time. Hence the plot fulfillment problem is in NP.\\\\\\
+\textbf{Plot Fulfillment is NP Hard}\\
+We will try to reduce Hamiltonian Path (HP) problem which is NP complete (section 8.19 pg 480 textbook) to this Plot Fulfillment problem.
+
+Given the the input to HP problem we will construct an input to the plot fulfillment as follows - \\\\
+Given a directed graph G = (V,E), construct a new graph $G' = (V',E')$ which contains all the nodes and edges of the original graph G. Apart from that it contains a super source $s$ and super sink $t$. Add an edge from $s$ to all vertices in $V$ and from $t$ to all vertices in $V$.
+The additional edges in $G'$ will look something like the figure below -
+
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (11.7,-21.4) circle (3);
+\draw (11.7,-21.4) node {$s$};
+\draw [black] (61.5,-22) circle (3);
+\draw (61.5,-22) node {$t$};
+\draw [black] (26,-12.3) circle (3);
+\draw (26,-12.3) node {$v_1$};
+\draw [black] (40.1,-12.3) circle (3);
+\draw (40.1,-12.3) node {$v_2$};
+\draw [black] (40.1,-22) circle (3);
+\draw (40.1,-22) node {$v_3$};
+\draw [black] (33.1,-28.7) circle (3);
+\draw (33.1,-28.7) node {$...$};
+\draw [black] (29.5,-38.9) circle (3);
+\draw (29.5,-38.9) node {$v_n$};
+\draw [black] (14.23,-19.79) -- (23.47,-13.91);
+\fill [black] (23.47,-13.91) -- (22.53,-13.92) -- (23.06,-14.76);
+\draw [black] (14.7,-21.46) -- (37.1,-21.94);
+\fill [black] (37.1,-21.94) -- (36.31,-21.42) -- (36.29,-22.42);
+\draw [black] (13.84,-23.5) -- (27.36,-36.8);
+\fill [black] (27.36,-36.8) -- (27.14,-35.88) -- (26.44,-36.59);
+\draw [black] (28.89,-13.09) -- (58.61,-21.21);
+\fill [black] (58.61,-21.21) -- (57.97,-20.52) -- (57.7,-21.48);
+\draw [black] (42.83,-13.54) -- (58.77,-20.76);
+\fill [black] (58.77,-20.76) -- (58.25,-19.98) -- (57.83,-20.89);
+\draw [black] (43.1,-22) -- (58.5,-22);
+\fill [black] (58.5,-22) -- (57.7,-21.5) -- (57.7,-22.5);
+\draw [black] (32.15,-37.5) -- (58.85,-23.4);
+\fill [black] (58.85,-23.4) -- (57.91,-23.33) -- (58.37,-24.22);
+\draw [black] (36.02,-28.01) -- (58.58,-22.69);
+\fill [black] (58.58,-22.69) -- (57.69,-22.39) -- (57.92,-23.36);
+\draw [black] (14.7,-22.6) -- (30.25,-27.76);
+\fill [black] (30.25,-27.76) -- (29.65,-27.03) -- (29.34,-27.98);
+\draw [black] (14.56,-20.48) -- (37.24,-13.22);
+\fill [black] (37.24,-13.22) -- (36.33,-12.98) -- (36.63,-13.94);
+\end{tikzpicture}
+\end{center}
+
+Let the number of thematic elements in the plot fulfillment problem will be equal to the number of vertices in original graph $G$ and each set $T_i$ will contain only one element $v_i$. So $T_i$ = \{$v_i$\}. This is a valid construction each each $T_i$ is a subset of the total vertices set of graph $G'$ which is $V'$.
+
+Now we will prove that the Hamiltonian Path problem can be reduced to the plot fulfillment problem.
+
+\begin{proof}
+We will first prove that an yes instance to the HP problem implies an yes instance to the plot fulfillment problem. Suppose that we have a path which satisfies HP property. This means that we have a path $p$  starting from any vertex a and ending at some vertex b which covers all the vertices in $|V|$. Then there is an obvious path in $G'$ which starts at s then goes to a,follows the path p and then finally goes to b. This is true because by construction of $G'$ there is an edge from s to each vertex in $V$ and a edge from each vertex in $V$ to t. Since each set $T_i$ contains a vertex $v_i$ in $V$, this means that we have covered exactly one node from each set $T_i$. Hence we have a valid plot which contains all thematic elements. Since the path which solves hamiltonian path is simple, this means the path which solves the plot fulfillment will also be simple. Therefore we have an yes instance to plot fulfillment.\\\\
+Now we will prove that an yes instance to this plot fulfillment problem implies an yes instance to the HP problem. Assume that we have a simple path from $s$ to $t$ which contains at least one element from each set $T_i$. Since each set contains exactly one element by construction, this means that the path contains all vertices of original graph $G$ exactly once. If we take the next element to s on this path and label it as $a$ and take the element before $t$ on this path and label it as $b$, then the path from $a$ to $b$ contains exactly one element from each $T_i$ and hence they contain all vertices of $v$ exactly once. Also since the path in plot fulfillment in simple, the path from a to be would be simple as well. But this is exactly what defines a hamiltonian path. Hence an yes instance of the plot fulfillment means an yes instance of the hamiltonian path problem.\\\\
+Finally we show that this construction take polynomial time. The new graph $G'$ has vertex set size $|V'|$ = $|V| + 2$. The size of edge set $|E'|$ = $|E| + 2*|V|$. Constructing the new graph takes time $O( V' + E')$, which is polynomial in size of original input. \\\\
+This completes the reduction.
+\end{proof}
+This means that the plot fulfillment problem is as hard as Hamiltonian Path and hence it is NP-Hard. Since it is also in NP, this means that this is NP Complete.
+\end{document}

@@ -1,0 +1,170 @@
+\documentclass[12pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand*\Th[1]{{#1}^{\textrm{th}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 3, Problem 1}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\bigskip
+
+\textbf{(1)}
+\emph{(10 points)}
+Solve Chapter 6, Exercise 6 in Kleinberg \& Tardos.
+
+\subsection{Solution}
+
+\subsubsection{Problem Statement}
+
+Given a sequence of words W = \{$w_1, w_2, .. w_n$\} where $w_i$ contains $c_i$ characters. Maximum length of each line of text is $L$. If $w_i$ to $w_k$ are assigned to a line then $\sum\limits_{i}^{k-1} (c_i+1)$ + $c_k \leq L$ must hold for the line to be valid. We have to find a partition of set of words W into valid lines so that sum of squares of slack of all valid lines including the last one is minimized.
+
+\subsubsection{Building the algorithm}
+Let $s_{ij}$ be the slack if we have a line which starts at $w_i$ and ends at $w_j$. Using this definition \\
+$s_{ij}$ = \{ $L - \sum\limits_{i}^{k-1} (c_i+1)$ + $c_k$ \} if $L \geq \sum\limits_{i}^{k-1} (c_i+1)$ + $c_k$ else INF. Here INF stands for a very big number which is greater than all numbers possible in this problem. If $s_{ij}$ is INF then this would mean that the line formed by words $w_i$ to $w_j$ is an invalid line. We will pre compute this slack matrix so that we don't have to re compute this values in our main algorithm.
+\\\\
+Now consider the last word $w_n$. This word can be part of a line which can start at any $j < n$. Let OPT(n) be the minimum slack of words $w_1$ to $w_n$ partitioned optimally. \\
+OPT(n) = min \{ OPT(j-1) + $s_{jn}$ \} for j = 1 to i
+\\\\
+This recurrence will give us optimal slacks for all prefix word set and our answer will be simply OPT(n). We can also find all the partition points by storing at which j each we the optimal value for OPT(i). We can store this value in an array $prev[]$. Hence the partition points can be recovered as prev[n], prev[prev[n]]... and so on until we reach the beginning of the word list i.e prev[i] = 1.
+\\\\
+Also $s_{ij}$ can be precomputed using the following recurrence : \\
+$s_{ii}$ = L - $c_i$ $\forall i$ since this means that this is the only word in this line. Here it is also assumed that the input is such that $c_i  \leq L$ $\forall i$ otherwise the words cannot be partitioned.\\
+$s_{ij}$ = ${s_{i,j-1} - c_j -1}$ $\forall {i \neq j}$ since if we want words $w_i$ to $w_j$ in a line, then we can simple subtract $c_j$ -1 from the slack of $w_i$ and the preceding word to j. We also set $s_{ij}$ equal to INF is the slack is negative to signify that it is an invalid partition so that it does not get included in the solution.
+
+\subsubsection{Algorithm}
+
+\begin{algorithm}[H]
+  \caption{}
+  \begin{algorithmic}[1]
+	\Procedure{pretty\_printer}{$W\lbrack \rbrack, C\lbrack\rbrack , L$}
+		\Let{$s\lbrack{i,j}\rbrack$}{$INF$} $\forall {i,j}$ \Comment{ Slack if words i to word j form a line}
+		\ForAll{$i = 1,n$}	
+			\State ${s\lbrack{i,i}\rbrack} \gets {L- c_i}$
+			\ForAll{$j = i+1,n$}
+				\If {$s\lbrack{i,j-1}\rbrack - c_j -1 \geq 0$}
+				\State ${s\lbrack{i,j}\rbrack} \gets {s\lbrack{i,j-1}\rbrack - c_j -1}$
+				\EndIf
+			\EndFor
+		\EndFor
+		\ForAll{$i = 1,n$}	\Comment{We want to minimize the square of slacks}
+			\ForAll{$j = i+1,n$}
+				\If {$s\lbrack{i,j}\rbrack\neq INF$}
+				\State ${s\lbrack{i,j}\rbrack} \gets {s\lbrack{i,j}\rbrack * s\lbrack{i,j}\rbrack}$
+				\EndIf
+			\EndFor
+		\EndFor
+		
+		\Let{$OPT\lbrack{i}\rbrack$}{$INF$} $\forall {i}$ \Comment{ OPT(i): the minimum slack by partitioning words from 1 to i}	\Let{$prev\lbrack{i}\rbrack$}{$0$} $\forall {i}$ \Comment{ prev(i): the starting point of the line in which $w_i$ lies.}	
+		\Let{$OPT\lbrack{0}\rbrack$}{$0$} \Comment{Handling the base case since the min slack for zero words is zero}	
+		\ForAll{$i = 1,n$}
+			\ForAll{$j = 1,i$}	
+				\If {$ s_{ji} \neq INF$}\Comment{If $w_j$ to $w_i$ form a valid line}
+					\If {$ OPT \lbrack i \rbrack > OPT \lbrack j-1 \rbrack + s_jk $}
+					\State${OPT \lbrack i \rbrack} \gets {OPT \lbrack j-1 \rbrack + s_jk}$
+					\State${prev \lbrack i \rbrack} \gets {j}$
+					\EndIf
+				\EndIf
+			\EndFor
+		\EndFor
+
+		\State \Return{$OPT \lbrack n \rbrack$, $prev \lbrack \rbrack$}
+	\EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Proof of Correctness}
+\begin{proof}
+We will prove this by induction. We claim that OPT(k) is the optimal slack value for words from $w_1$ to $w_k$. The base case for k= 0 is trivially true since the slack is zero for no words. Now consider OPT(k+1). Using the argument above we know that\\ optimal(n) = min \{ optimal(j-1) + $s_{jn}$ \} for j = 1 to i
+\\
+Now assume that inductive hypothesis holds i.e OPT(j) is optimal slack for all j from 1 to k assuming strong induction \\
+optimal(k+1) = min \{ OPT(j-1) + $s_{jn}$ \} for j = 1 to k+1, which means\\
+optimal(k+1) = OPT(k+1) which proves the inductive step.
+\end{proof}
+
+\subsubsection{Complexity Analysis}
+
+Steps 3-7 and 8-11 take $O(n^2)$. Steps 14-19 take $O(n^2)$. Partition points can be recovered as prev[n], prev[prev[n]]... and so on until we reach the beginning of the word list i.e prev[i] = 1. This takes $O(n)$ time.\\
+Hence total time complexity $O(n^2)$\\
+Total space complexity $O(n^2)$
+\end{document}

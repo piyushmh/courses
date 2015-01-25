@@ -1,0 +1,145 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand*\Th[1]{{#1}^{\textrm{th}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 6, Problem 3}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\bigskip
+
+\textbf{(3)}
+\emph{(5 points)}
+{\em In this problem --- as in the lectures this semester,
+but contrary to the textbook --- a flow network may
+have edges entering the source and/or leaving the sink.}
+
+A flow network is called {\em Eulerian} if the combined 
+capacity of the incoming edges at any vertex is equal to 
+the combined capacity of the outgoing edges at that vertex.
+If $a$ and $b$ are any two distinct vertices of an Eulerian
+flow network, prove that the maximum flow from $a$ to $b$ is
+equal to the maximum flow from $b$ to $a$.
+
+\bigskip
+\subsection{Solution}
+\begin{lemma}
+In an Eulerian graph, for any cut $A,B$, we have C(A,B) = C(B,A) where C(A,B) is the capacity of all edges going from A to B.
+\begin{proof}
+Let $C(x,A)$ where $x$ is any vertex in the graph G and A is any subset of vertices in G denote the sum of capacities of all edges going from x to any vertex in $A$.
+
+Let $C(A,x)$ be the sum of capacities of all edges going from any vertex in $A$ to vertex x.
+
+Since we know that capacity going out from each node is equal to the capacity going in, we have $C(x,V) = C(V,x)$ where $V$ is the vertex set in G.
+
+Now for any cut A,B we have $V=A+B$.
+
+This means that 
+C(x, A) + C(x,B) = C(A,x) + C(B,x) for any vertex x
+
+Now let all the vertices in A be $a_1, a_2 ... a_{|A|}$. Then we have\\\\
+$C(a_1, A) + C(a_1,B) = C(A,a_1) + C(B,a_1)$\\
+$C(a_2, A) + C(a_2,B) = C(A,a_2) + C(B,a_2)$\\
+..\\
+..\\
+$C(a_{|A|}, A) + C(a_{|A|},B) = C(A,a_{|A|}) + C(B,a_{A|})$\\\\
+Adding all these equations
+
+$C( (a_1 + a_2 .. + a_{|A|}), A) + C((a_1 + a_2 .. + a_{|A|}),B) = C(A,(a_1 + a_2 .. + a_{|A|})) + C(B,(a_1 + a_2 .. + a_{|A|}))$\\\\
+Since $a_1 + a_2 .. + a_{|A|}$ = $A$ , we have \\\\
+$C(A,A) + C(A,B) = C(B,A) + C(A,A)$\\\\
+$C(A,B) = C(B,A)$
+\end{proof}
+\end{lemma}
+
+\subsection{Proof}
+
+Now let the maximum flow from a to b has a minimum cut $A_1,B_1$. From max flow min cut theorem we know that this is also the minimum cut among all cuts from a to b. Since $C(A_1,B_1)$ is also equal to $C(B_1, A_1)$ from lemma 1, this means that $C(B_1, A_1)$ is the minimum cut for all flows from b to a.
+
+Now let the maximum flow from b to a has a minimum cut $B_2,A_2$. From max flow min cut theorem we know that this it min cut among all cuts from b to a. But we also know that $C(B_1, A_1)$ is the minimum cut from b to a. This means that \\\\
+$C(B_2, A_2)$ = $C(B_1, A_1)$\\
+$C(B_2, A_2)$ = $C(A_1, B_1)$\\\\
+Also max flow from a to b = $C(A_1, B_1)$\\
+max flow from b to a = $C(B_2, A_2)$\\\\
+This means that max flow from a to b is equal to max flow from b to a.
+
+\end{document}

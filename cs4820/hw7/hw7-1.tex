@@ -1,0 +1,169 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 7, Problem 1}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\medskip
+\textbf{Hand in your solutions electronically using CMS.
+Each solution should be submitted as a separate file.
+For multi-part problems, all parts of the solution to that problem should be included in a single file.}
+
+\textbf{Remember that when a problem asks you to design an algorithm, you must also prove the algorithm's correctness and analyze its running time.
+The running time must be bounded by a polynomial function of the input size.}
+
+\bigskip
+
+\textit{\textbf{The following problems ask you to design ``self-contained polynomial-time reductions.'' You should interpret that term as follows. If \textsc{a} and \textsc{b} are two decision problems, a self-contained polynomial-time reduction from \textsc{a} to \textsc{b} is a polynomial-time algorithm that takes an instance of \textsc{a} and outputs an instance of \textsc{b}. To show that the reduction is correct, you must prove two things. First, that it transforms \textsc{yes} instances of \textsc{a} to \textsc{yes} instances of \textsc{b}. Second, that it transforms \textsc{no} instances of \textsc{a} to \textsc{no} instances of \textsc{b}.}}
+
+\bigskip
+
+\textbf{(1)}
+\emph{(10 points)}
+In class, we stated without proof the important fact that \textsc{3sat} is NP-hard, which means that every problem in NP reduces to \textsc{3sat} in polynomial time.
+
+To gain some intuition about how these reductions work, this exercise asks you to give a self-contained polynomial-time reduction from \textsc{independent set}  to \textsc{3sat}.
+
+\subsection{Solution}
+
+To solve this first we will reduce \textsc{independent set} to \textsc{Vertex Cover}, then \textsc{Vertex cover} to \textsc{sat} and then reduce \textsc{sat} to \textsc{3sat}.\\\\
+\textbf{Reduction from \textsc{Independent set} to \textsc{Vertex Cover}}
+This reduction was covered in class and we will assume its correctness from class.\\\\
+\textbf{Reduction from \textsc{Vertex Cover} to \textsc{SAT}}
+
+The input to vertex cover is the following - graph G = (V,E) and an integer k. First lets transform this into an input to a \textsc{sat} instance.
+
+Let the variables of the \textsc{sat} instance be $x_{i,v} |  \forall v \in V , 1 \leq i \leq k$ where $x_{i,v}$ denotes that node v is the $i^{th}$ element in the vertex cover.\\\\
+\underline{Let us define an intermediate operator :}\\\\
+at\_least\_one$\{l_1, l_2, ... l_x\}$ = 
+($l_1 \vee \l_2 ... \vee l_x$)
+\newpage
+We can write the equivalent \textsc{sat} expression as follows F = \\\\ 
+$\bigwedge\limits_{(u,v) \in E}$at\_least\_one\{ $x_{i,u} \vee x_{i,v}| 1 \leq i \leq k$\}\\
+$\wedge \bigwedge\limits_{1 \leq i \leq k}\bigwedge\limits_{u \in V, v \in V, u \neq v}$ ($\neg{x_{i,u}} \vee \neg{x_{iv}})$\\
+$\wedge \bigwedge\limits_{1 \leq i \leq k}$ at\_least\_one\{ $x_{i,u} | u \in V$\}\\\\\\
+The first part of the expression makes sure that we select at least one vertex for each edge for any value of k. The second clause makes sure that we don't end up having the 2 nodes for the same value of k. 
+The third part of the clause makes sure that we choose a node for every value of k and so we end up with at most k nodes.
+
+Now we prove that this is valid reduction
+\begin{proof}
+We claim that a \textsc{yes} instance of \textsc{sat} implies a \textsc{yes} instance of vertex cover. We can see that if the \textsc{sat} instance gives the answer Yes, then we know that for each value of edge u-v, we have atleast one of $x_{iv}$ or $x_{iu}$ set to one which means that we cover this edge. This is by construction of the \textsc{sat} expression as explained above. Also by the second and the third clauses we are picking up atmost k elements since we don't allow multiple nodes are a single value of k and we have a valid assignment for each value of k. Hence if we have a satisfying assignment for SAT, then the vertex cover is the set of all v's for which $x_{iv}$ is set to true for some value of  k. \\\\
+Now we show that a yes instance of vertex cover implies a yes instance of \textsc{sat}. If we have a yes instance of the vertex cover, then we can just pick elements from the vertex cover and assign them subscripts from 1 to k to generate a set of variables of the form $x_{i,v}$. Now we know that these variable satisfy the first clause since nodes in vertex cover cover all edges. Since we have atmost k nodes in the vertex cover and have assigned every value of k a node, clauses two and third will also be satisfied. Hence if we have the set of vertices which cover the edges, we can have a satisfying assignment for this SAT instance.
+
+Now we show that the algorithm for converting from an instance of vertex cover to \textsc{sat} takes polynomial time. We can just show this by proving that our \textsc{sat} clause have polynomial terms. We can see that the first set of clauses have terms equal to $2* |E| * k$. The second set of clauses have terms equal to $(2*|V|^2) * k$. The third set of clause have term equal to $k * |V|$. The combined sum of terms is hence polynomial in $|V|$, $|E|$ and k.
+
+Hence the reduction is complete.
+\end{proof}
+
+\textbf{Reduction from \textsc{sat} to \textsc{3sat}}
+
+A general \textsc{sat} expression can have expressions of any length. We will show how to convert the following length expressions into equivalent \textsc{3sat} expressions
+\begin{enumerate}
+\item Clauses of length one : ($x_1$) - Add two additional variables $z_1$ and $z_2$. Then add theses clauses \\
+$(x_1 \vee z_1 \vee x_2) \wedge
+(x_1 \vee \neg z_1 \vee x_2) \wedge
+(x_1 \vee  z_1 \vee \neg x_2) \wedge
+(x_1 \vee \neg z_1 \vee \neg x_2)$
+\item Clauses of length two : ($x_1 \vee x_2$) -  Additional variable z . These can be replaced by ($x_1 \vee x_2 \vee z) \wedge (x_1 \vee x_2 \vee \neg z)$
+\item Clauses of length three : Do nothing
+\item Clauses of length $n > 3$ : ($x_1 \vee x_2 .. \vee x_n$) - We will introduce extra variable $z_1$ to $z_{n-3}$ 
+
+We can write such a clause of length n as the following clause : \\
+$(x_1 \vee x_2 \vee z_1) \wedge (\neg{z_1} \vee x_3 \vee z_2) \wedge (\neg{z_2} \vee x_4 \vee z_3) $ .... $\wedge (\neg{z_{n-3}} \vee x_{n-1} \vee x_n)$
+\end{enumerate}
+
+The conversion for $n > 3$ works because no matter whatever be the assignments of the variables $z_1$ to $z_{n-3}$, we can never have a satisfying clause without one of the $x_i$'s to be true. This is because the there is a not operator on a single z variable in each consecutive clause.
+
+Now we prove that this is valid reduction
+\begin{proof}
+First we show that a valid instance of \textsc{3sat} implies a valid instance of \textsc{sat}. Note that if we assign the values of $x_i$ in our \textsc{sat} identical to the values of $x_i$ in an yes instance of \textsc{3sat}, we would get a yes instance of \textsc{sat}. This is by construction.
+
+Now we show that a valid instance of the \textsc{sat} will result in a valid instance of \textsc{3sat} that we have constructed. Note that for clauses of one a satisfying assignment in \textsc{sat} would result in a satisfying assignment of \textsc{3sat} because no matter what values $z_1$ and $z_2$ take, the final value would depend upon the value of $x_1$. The same argument applies for n = 2. We have explained above by for n $>$ 3, atleast one of the x's must be true to make the clause true. So a satisfying assignment for \textsc{sat} would result in a satisfying assignment for \textsc{3sat}
+
+Finally we show that this reduction takes polynomial time. We can show this by showing that the number of terms in the \textsc{3sat} expression that we have created is polynomial. For n = 1,2,3 the length of the \textsc{3sat} is constant number of terms more than the corresponding \textsc{sat} clauses. For $n > 3$, notice that the number of terms in \textsc{3sat} is atmost twice more than the number of terms in \textsc{sat}. This shows that the number of terms in \textsc{3sat} would be remain polynomial in terms of the number of clauses in \textsc{sat}.
+
+This completes the proof.
+\end{proof}
+
+Hence by the transitivity of reductions we have shown that the reduction of \textsc{inde  pendent set} to \textsc{3sat}
+\end{document}

@@ -1,0 +1,115 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 9, Problem 1}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\medskip
+
+
+\textbf{1.}
+\emph{(10 points)}
+The class \textbf{NP} is defined in terms of polynomial-time verifiers and polynomial-length certificates.
+In this exercise, we will see that semidecidable problems can be characterized in terms of verifiers and certificates of unbounded length.
+(A problem is called \emph{semidecidable} if the set of \textsc{yes} instance is recursively enumerable.)
+
+Show that a problem $A$ is semidecidable if and only if there exists a Turing machine~$V$ that halts on every input and satisfies the following property:
+a string $x$ is a \textsc{yes} instance of $A$ if and only there exists some string $y$ such that $V$ on input~$x\#y$ accepts.
+
+\subsection{Solution}
+
+Given a problem A which is semidecidable we know that there exists a turing machine $M$ which accepts x if x $\in$ A \\\\
+Construct a turing machine $V$ which is basically the same machine $M$ which when given a input of the form x\#y simulates x on M for y steps. If M does not halt within y steps, V just halts and rejects. It accepts if M accepts x within y steps. If the input does not contain a finite y, then the $V$ halts.
+
+We will show below that $V$ halts on every input and satisfies the property mentioned in the question.
+
+\subsubsection{Proof of Correctness}
+\begin{proof}
+First we have to prove that the machine V that we have constructed halts on every input. We know that the machine V runs for maximum y steps. If M accepts before that, V also accepts. Otherwise V halts and rejects. Also if the value of y is not a finite valid value, then $V$ simply halts. Hence V halts on any input.
+\end{proof}
+\begin{proof}
+Now we prove that given a semi decidable problem A, there exists such a turing machine $V$ which satisfies the property that it accepts on input x\#y if x is an \textsc{yes} instance of $A$. \\We know the machine M described above exists since A is semi decidable (by definition of semi decidable problem). Since V is a modified version of M, it also exists. Also we know that a \textsc{yes} instance of x is accepted by the machine M in a finite number of steps. Now if we run V on inputs x\#y by varying y from 1,2,..$\infty$, we know that we will find a finite value of y on which V accepts and halts. This value would be the number of steps that M takes to accept the \textsc{yes} instance x. Hence if $A$ is semi decidable then turning machine $V$ exists which halts on every input and satisfies the given property.\\\\
+Now we prove the reverse direction of statement - if such a machine $V$ exists which follows this property, then A is semi decidable. Now we know that if $V$ accepts a input x\#y, this means that the string x is an \textsc{YES} instance of $A$ (using the iff condition of this property). We also know that $V$ halted within y number of steps. This means that if there is a \textsc{yes} instance of the problem $A$, we can construct a TM $M$ (which is basically V), which accepts x in a finite number of steps (which is y). This means that $A$ is semi decidable.
+
+This completes the proof.
+\end{proof}
+\end{document}

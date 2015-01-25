@@ -1,0 +1,322 @@
+\documentclass[12pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand*\Th[1]{{#1}^{\textrm{th}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 5, Problem 2}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: Eeghan Wagh
+}
+
+\bigskip
+
+\textbf{(2)}
+\emph{(15 points)}
+Let $G$ be a flow network with vertex set $V$, edge set $E = \{e_1,e_2,\ldots,e_m\}$, source $s\in V$ and sink $t\in V$. 
+If $x$ is a vector in the vector space $\mathbb R^m$, we will say that:
+\begin{itemize}
+\item $x$ is a {\em flow vector} if there exists a flow $f$ such that
+$x_i = f(e_i)$ for all $i$.
+\item $x$ is a {\em path vector} if there exists a directed path from
+$s$ to $t$ such that $x_i=1$ if $e_i$ belongs to the path and $x_i=0$ otherwise.
+\item $x$ is a {\em cycle vector} if there exists a directed cycle
+such that $x_i=1$ if $e_i$ belongs to the cycle and $x_i=0$ otherwise.
+\end{itemize}
+
+\textbf{(2.a)}
+Prove that every flow vector can be represented as a non-negative
+weighted sum of path vectors and cycle vectors. To prove this, you
+should design a polynomial-time algorithm to compute such a 
+representation. As usual, you should analyze your algorithm's
+running time and prove its correctness.
+
+\textbf{(2.b)}
+Give an example of a flow network having a flow vector 
+that cannot
+be represented as a non-negative weighted sum of path vectors.
+Your example should specify both the flow network $G$
+and the flow vector $x$.
+
+\textbf{(2.c)}
+Prove the following statement, or give a counterexample:
+{\em if a flow $f$ is computed using the Ford-Fulkerson 
+algorithm, then the corresponding flow vector $x$ can 
+always be represented as a non-negative weighted sum of 
+path vectors.}
+(If you are giving a counterexample, your counterexample
+should specify not only the flow network $G$ and the 
+flow $f$, but also the sequence of augmenting paths used
+in the Ford-Fulkerson execution that computes $f$.)
+
+
+\bigskip
+
+\subsection{Solutions}
+\textbf{(2.a)}
+
+Let a valid flow vector be F.  Let a simple path from s-t be P such that all edges e on that path P have f(e) $>$ 0. Let the minimum cost edge along the simple path be the bottleneck edge and its flow value be b(P).
+
+\subsubsection{Algorithm}
+
+Phase 1\\\\
+In one iteration of the algorithm we will find a simple path P from source to sink such that edges on that path have a positive flow. Then we will subtract b(P) from all edges on that path. Record the path P and its bottleneck b(P). We will keep on performing the steps above until there are no such paths.
+
+Phase 2\\\\
+Then pick any edge with a positive flow remaining and run DFS start from any node of that edge to find a cycle. Traverse only the edges with positive flow. We will prove the claim that a cycle will always exist below. Now find the bottleneck of this cycle b(C) and subtract this value from all edges of this cycle. Record each cycle C and b(C). Continue performing this operation unless there is no edge left with a positive flow.
+
+For every such path P, create a path vector pv(P) and let its weight be b(P).\\
+For every such cycle C, create a cycle vector cv(P) and let its weight be b(C).\\
+
+The flow F can be expressed as \\\\
+F = $\sum_{all P}$ b(P) * pv(P) + $\sum_{all C}$ b(C) * cv(P) 
+
+
+\subsubsection{Proof of correctness}
+\begin{lemma} After each iteration of phase 1, each node v $\neq$ s,t of the graph has $f^{in}(v)$ = $f^{out}(v)$
+\begin{proof}
+This claim is true before phase 1 since f is a valid flow. Consider any iteration of phase 1. When we subtract the bottleneck flow from any path, the we subtract the same amount entering the node and the same amount exiting any node since P is a simple path. Hence the lemma will hold after every iteration for all nodes except s,t.
+\end{proof}
+\end{lemma}
+
+\begin{lemma} After phase 1, any edge with positive flow is part of a cycle
+\begin{proof}
+When we end phase 1, there is no path from s-t. From lemma 1, we can conclude that all the nodes which part of a positive flow after phase 1 has $f^{in}(v)$ = $f^{out}(v)$. Now when we perform DFS, suppose we start on node x. At the first step suppose we go to node y. Because we know that there is some flow entering y, there would be an equal flow leaving y. Suppose we go to some node z after that. We can use the same argument on z and every other node that the DFS traverses after that. Since there are a finite number of nodes in the graph, the DFS traversal will eventually come back to x since we already have some flow leaving it. Hence we will always have a cycle.
+\end{proof}
+\end{lemma}
+\begin{lemma} After each iteration of phase 2, each node v $\neq$ s,t of the graph has $f^{in}(v)$ = $f^{out}(v)$
+\begin{proof}
+From lemma 1 we know that this property holds before beginning of phase 2. From lemma 2 we know that each iteration of phase 2 results in subtracting a bottleneck flow from a cycle. Since we are removing the same amount entering a node and leaving the node and the path is a cycle, this property will remain true after every iteration.
+\end{proof}
+\end{lemma}
+
+Let us first prove that phase 1 and phase 2 take finite number of steps. In each iteration of phase 1, we make the flow value of one edge as zero. This means after at most 'm' iterations all edges should have zero flow and phase 1 would terminate. Similarly in phase 2, we are making flow value of some edge zero in each iteration. Hence it would execute at most 'm' times.
+
+
+From lemma 2 we know that whenever there is a positive flow edge, its part of a cycle. Hence when the algorithm terminates, we would have found all the cycles. Also we have all the simple paths from phase 1. Also once we subtract a flow, we never add it again. So when we will add all the paths and all the cycles weighted by their bottleneck flows, these will sum up to the flow itself.
+\subsubsection{Running Time}
+
+Each step of phase 1 takes atmost O(m) time. And as proved above we can have atmost 'm' iterations. Hence phase one takes at most $O(m^2)$ time.
+
+Similarly each step of the phase 2 takes $O(m)$ time and we can have at most 'm' such iterations. Hence phase two takes at most $O(m^2)$ time.
+
+Hence the total running time is $O(m^2)$. 
+
+
+
+\textbf{(2.b)}
+
+
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (52.7,-17.9) circle (3);
+\draw (52.7,-17.9) node {$t$};
+\draw [black] (28.9,-29.8) circle (3);
+\draw (28.9,-29.8) node {$a$};
+\draw [black] (42.4,-29.8) circle (3);
+\draw (42.4,-29.8) node {$b$};
+\draw [black] (35.4,-44.8) circle (3);
+\draw (35.4,-44.8) node {$c$};
+\draw [black] (24.6,-17.9) circle (3);
+\draw (24.6,-17.9) node {$s$};
+\draw [black] (27.6,-17.9) -- (49.7,-17.9);
+\fill [black] (49.7,-17.9) -- (48.9,-17.4) -- (48.9,-18.4);
+\draw (38.65,-18.4) node [below] {$10$};
+\draw [black] (25.62,-20.72) -- (27.88,-26.98);
+\fill [black] (27.88,-26.98) -- (28.08,-26.06) -- (27.14,-26.4);
+\draw (25.99,-24.63) node [left] {$10$};
+\draw [black] (31.9,-29.8) -- (39.4,-29.8);
+\fill [black] (39.4,-29.8) -- (38.6,-29.3) -- (38.6,-30.3);
+\draw (35.65,-30.3) node [below] {$20$};
+\draw [black] (41.13,-32.52) -- (36.67,-42.08);
+\fill [black] (36.67,-42.08) -- (37.46,-41.57) -- (36.55,-41.15);
+\draw (38.19,-36.26) node [left] {$10$};
+\draw [black] (34.21,-42.05) -- (30.09,-32.55);
+\fill [black] (30.09,-32.55) -- (29.95,-33.49) -- (30.87,-33.09);
+\draw (32.88,-36.33) node [right] {$10$};
+\draw [black] (44.36,-27.53) -- (50.74,-20.17);
+\fill [black] (50.74,-20.17) -- (49.84,-20.45) -- (50.59,-21.1);
+\draw (48.1,-25.3) node [right] {$10$};
+\end{tikzpicture}
+\end{center}
+
+Let G be defined as follows \\
+V = \{s,a,b,c,t\}\\\\
+Capacities :
+\begin{enumerate}
+\item s-a = 10
+\item a-b = 20
+\item b-c =10
+\item c-a = 10
+\item b-t = 10
+\item  s-t = 10
+\end{enumerate}
+
+Flow vector f = [ 10 , 20 ,10 ,10 , 10, 10].\\\\
+This cannot be represented as a sum of path vectors since there is no simple path which constitutes edges b-c and c-a. This is because the only path that b-c and c-a can be part of would have a cycle.
+
+\textbf{(2.c)}
+
+The statement is false. This is because it is possible that Ford Fulkerson during any augmentation adds flow to some cycle in G and then remove the flow from edges which connect that cycle to the remaining graph during the augment process. This will result in case where the flow f output by FF cannot be represented as only a non-negative weighted sum of path vectors.
+
+Here is a counterexample - 
+
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (13.7,-29) circle (3);
+\draw (13.7,-29) node {$1$};
+\draw [black] (28.6,-11.8) circle (3);
+\draw (28.6,-11.8) node {$2$};
+\draw [black] (49.6,-11.2) circle (3);
+\draw (49.6,-11.2) node {$3$};
+\draw [black] (32,-22.7) circle (3);
+\draw (32,-22.7) node {$5$};
+\draw [black] (45.9,-22.7) circle (3);
+\draw (45.9,-22.7) node {$4$};
+\draw [black] (39,-47.3) circle (3);
+\draw (39,-47.3) node {$7$};
+\draw [black] (63.2,-30.9) circle (3);
+\draw (63.2,-30.9) node {$8$};
+\draw [black] (39,-33.1) circle (3);
+\draw (39,-33.1) node {$6$};
+\draw [black] (15.66,-26.73) -- (26.64,-14.07);
+\fill [black] (26.64,-14.07) -- (25.73,-14.34) -- (26.49,-15);
+\draw (21.7,-21.85) node [right] {$10$};
+\draw [black] (16.13,-30.76) -- (36.57,-45.54);
+\fill [black] (36.57,-45.54) -- (36.21,-44.67) -- (35.63,-45.48);
+\draw (24.85,-38.65) node [below] {$10$};
+\draw [black] (41.48,-45.62) -- (60.72,-32.58);
+\fill [black] (60.72,-32.58) -- (59.77,-32.62) -- (60.33,-33.45);
+\draw (52.6,-39.6) node [below] {$10$};
+\draw [black] (31.6,-11.71) -- (46.6,-11.29);
+\fill [black] (46.6,-11.29) -- (45.79,-10.81) -- (45.82,-11.81);
+\draw (39.13,-12.04) node [below] {$10$};
+\draw [black] (51.3,-13.67) -- (61.5,-28.43);
+\fill [black] (61.5,-28.43) -- (61.45,-27.49) -- (60.63,-28.06);
+\draw (55.8,-22.41) node [left] {$10$};
+\draw [black] (33.68,-25.19) -- (37.32,-30.61);
+\fill [black] (37.32,-30.61) -- (37.29,-29.67) -- (36.46,-30.23);
+\draw (34.89,-29.24) node [left] {$5$};
+\draw [black] (42.9,-22.7) -- (35,-22.7);
+\fill [black] (35,-22.7) -- (35.8,-23.2) -- (35.8,-22.2);
+\draw (38.95,-22.2) node [above] {$5$};
+\draw [black] (40.66,-30.6) -- (44.24,-25.2);
+\fill [black] (44.24,-25.2) -- (43.38,-25.59) -- (44.22,-26.14);
+\draw (43.06,-29.23) node [right] {$5$};
+\draw [black] (31.11,-19.84) -- (29.49,-14.66);
+\fill [black] (29.49,-14.66) -- (29.25,-15.58) -- (30.21,-15.28);
+\draw (31.07,-16.61) node [right] {$5$};
+\draw [black] (39,-44.3) -- (39,-36.1);
+\fill [black] (39,-36.1) -- (38.5,-36.9) -- (39.5,-36.9);
+\draw (39.5,-40.2) node [right] {$10$};
+\end{tikzpicture}
+\end{center}
+
+Here is graph G and the number on the edges represent the maximum capacity of the edges of the network flow graph.
+
+
+Here the augmented paths that are added to the graph G 
+\begin{enumerate}
+\item (1 - 7 - 6 - 4 - 5 - 2 - 3 - 8) -  Added flow 5
+\item (1 - 2 - 6 - 7 - 8) -  Added flow 5
+\item (1 - 2 - 3 - 8) - Added flow 5
+\item (1 - 7 - 8) - Added flow 5
+\end{enumerate}
+FF stops after this since there are no simple paths in the residual graph since both the edges (1,2) and (1,7) from the source 1 have been saturated.
+The final flow on each edge is :
+\begin{enumerate}
+\item 1-2	: 10
+\item 2-3	: 10
+\item 3-8	: 10
+\item 1-7	: 10
+\item 7-8	: 10
+\item 6-4	: 5
+\item 4-5	: 5
+\item 5-6	: 5
+\item 5-2	: 0
+\item 7-6	: 0
+\end{enumerate}
+
+This flow vector cannot be represented as a non negative weighted sum of path vectors since the edge (5-6) can only be included in a s-t path which has a cycle.
+
+\end{document}

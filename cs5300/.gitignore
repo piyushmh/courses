@@ -1,0 +1,17 @@
+*.class
+RemoteSystemsTempFiles/*
+Servers/*
+.metadata/*
+cs5300proj1a/build/*
+cs5300proj1a/.classpath
+cs5300proj1a/src/AwsCredentials.properties
+# Package Files #
+*.war
+*.ear
+cs5300proj2-temp/tmp/*
+cs5300proj2/tmp/
+cs5300proj2/bin/
+cs5300proj2-temp/.classpath
+cs5300proj2-temp/.project
+cs5300proj2-temp/.settings/
+

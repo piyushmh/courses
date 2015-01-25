@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor,colortbl}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithmicx, algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+
+\typeout{Style Option FULLPAGE Version 2 as of 15 Dec 1988}
+
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+
+\textheight 8.9in
+
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+
+\textwidth 6.5in
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{empty}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-0.8in}
+\setlength{\textwidth}{6.8in}
+\setlength{\textheight}{9.5in}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0in}
+\addtolength{\parskip}{0.2cm}
+\setlength{\fboxrule}{.5mm}\setlength{\fboxsep}{1.2mm}
+\newlength{\boxlength}\setlength{\boxlength}{\textwidth}
+\addtolength{\boxlength}{-4mm}
+
+\newcommand{\algobox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{Introduction to Algorithms} \hfill \textbf{#1}\\
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#2}}}
+  \end{center}}
+
+\newcommand{\algosolutionbox}[2]{
+  \begin{center}
+    \framebox{\parbox{\boxlength}{
+        \textbf{CS 4820, Spring 2014} \hfill \textbf{#1}\\
+        #2
+      }}
+  \end{center}}
+
+
+\begin{document}
+
+\algosolutionbox{Homework 8, Problem 1}{
+  % TODO: fill in your own name, netID, and collaborators
+  Name: Piyush Maheshwari\\
+  NetID: pm489\\
+  Collaborators: None
+}
+
+\medskip
+\textbf{Hand in your solutions electronically using CMS.
+Each solution should be submitted as a separate file.
+For multi-part problems, all parts of the solution to that problem should be included in a single file.}
+
+\textbf{Remember that when a problem asks you to design an algorithm, you must also prove the algorithm's correctness and analyze its running time.
+The running time must be bounded by a polynomial function of the input size.}
+
+\bigskip
+
+\textbf{(1)}
+Consider the following scheduling problem:\\\\
+An organization meets every weekend, either on Saturday or Sunday but not both, and they need to
+schedule their meetings to accomodate a set of speakers, each of whom lists the days when they would
+be available to make a presentation. A meeting is not limited to one presentation, you can have any
+number of presentations at a meeting as long as you respect the speakers’ availability constraints.\\\\
+The input for the problem consists a list of $n$ weeks, indexed by numbers $1$ to $n$, and for every speaker
+two lists that indicate which Saturdays and Sundays the speaker is available. The goal is to decide if
+there exists a way to schedule meetings during the weekends so that every speaker is available for at
+least one of the meetings.\\\\
+Prove that this decision problem is NP-complete.
+
+\subsection{Solution}
+
+We know that boolean satisfiability problem is NP complete by the theorem of Cook and Levin ( Section 8.13 pg 468). We know that boolean satisfiability can be reduced to SAT ( Section 8.15 pg 471). Hence we know that SAT is NP complete since it is clearly in NP. Now we will show that the scheduling decision problem is in NP and we can reduce the SAT problem (which is NP complete) to it. This will prove that the scheduling decision problem is NP Complete.\\\\
+\textbf{Scheduling decision problem is in NP}
+
+A valid certificate for this problem would be a schedule of meeting during the weekends. We will first check to make sure that meetings are not scheduled on both weekends of the week. This can be done in polynomial time since there are a polynomial number of weeks. Then we have to check to make sure that every speaker gets to speak atleast once. We can do this check for every speaker in polynomial time since there are polynomial number of weeks. Since there are a polynomial number of speakers, the total time taken to do this check would be polynomial. Hence the solution can be verified in polynomial time.
+
+\textbf{Reduction from \textsc{SAT} to scheduling decision problem}
+
+Assume an arbitrary SAT instance with n variables and m clauses. %Consider any clause $c_x$ in the SAT expression :
+%$( x_i \vee \neg x_j \vee x_k ..)$
+We can construct an instance of the scheduling decision problem as follows:\\\\
+Let the number of variables $n$ in the SAT expression be equal to the number of weeks in the original scheduling problem. Let the number of clauses $m$ equal to the number of speakers. Let the variable $x_i$ represent $i^{th}$ week. Let the clause $c_j$ represent the schedule for the $j^{th}$ speaker. 
+\begin{enumerate}
+\item If the clause has a variable $x_i$, this means that the speaker is available on \textsc{saturday} of week $i$
+\item If the clause has a variable $\neg x_i$, this means that the speaker is available on \textsc{sunday} of week $i$.
+\item If the clause does not contain either $x_i$ or $\neg x_i$, this means the speaker is not available on both \textsc{saturday} and \textsc{sunday} of week $i$
+\end{enumerate}
+
+Using these rules, we can convert any \textsc{sat} instance into an input to the scheduling decision problem. \\
+Now we prove that this is a valid reduction :
+\begin{proof}
+First we will prove that a \textsc{yes} instance of the \textsc{sat} problem implies \textsc{yes} instance of the scheduling decision problem. If we have an satisfying assignment to the instance of SAT problem, this means that we have satisfied each clause. Suppose clause $c_j$ has an satisfying assignment. We know that there must be one variable in this clause which is set. If that variable is $x_i$ this means that this speaker can be scheduled on \textsc{saturday} of week $i$. If it has variable $\neg x_i$ set, then the speaker can be scheduled on \textsc{sunday} of week $i$. Since one variable must be set, every speaker will be scheduled at one weekend of any week. So we can schedule meetings according to variable assignments. Since only one of $x_i$ or $\neg x_i$ will be set, meeting will be scheduled on either Saturday or Sunday of a week. \\\\
+Now we will prove that a \textsc{yes} instance of the scheduling decision problem implies a \textsc{yes} instance of the \textsc{sat} decision problem. Suppose we have a valid schedule where each speaker $j$ is scheduled on one weekend of atleast one week $i$. This simply means by our construction that the clause $j$ will have atleast one $x_i$ or $\neg x_i$ as \textsc{true} depending upon Saturday or Sunday. This makes sure that every clause is satisfied since every speaker speaks at least once. Since we schedule meetings on either Saturday or Sunday of a week and not both, we can never have both $x_i$ and $\neg x_i$ as \textsc{true} for a given $i$. Hence given a valid schedule for the scheduling decision problem, we will have a yes instance of the \textsc{sat} problem.\\\\
+Finally we prove that the reduction take polynomial time. The list of n weeks can simply be constructed by counting the number of variables in the \textsc{sat} problem in $O(n)$ time. We can construct the two lists for each speaker by analysing each corresponding clause as explained above in $O(n)$ time. For m ( number of clauses) speakers total time would be $O(m*n)$. Hence we only take polynomial time for doing this reduction.\\\\
+This completes the proof.
+\end{proof}
+\end{document}
